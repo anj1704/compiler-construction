@@ -1,8 +1,11 @@
+#include "lexer.h"
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "lexer.h"
 #include <string.h>
+// SHOULD WE RETRACT WHILE THROWING ERROR
+
+SymTableItem getFunId() {}
 
 void removeComments(char *testcaseFile, char *cleanFile) {
   FILE *testcaseFp = fopen(testcaseFile, "r");
@@ -179,12 +182,14 @@ void insert(char *lexeme, terminals token) {
     table->sizeOfTable++;
   } else {
     // Lexeme already exists, handle as needed
+#ifdef DEBUG
     printf("Lexeme %s already exists in the symbol table.\n", lexeme);
+#endif
   }
 }
 
 // Function to lookup a lexeme in SymbolTable
-bool lookup(char *lexeme) {
+SymTableItem *lookup(char *lexeme) {
   int index = hash(lexeme);
 
   // Traverse the linked list at index to find the lexeme
@@ -192,12 +197,12 @@ bool lookup(char *lexeme) {
   while (current != NULL) {
     if (strcmp(current->lexeme, lexeme) == 0) {
       // Lexeme found in the symbol table
-      return true;
+      return current;
     }
     current = current->nextItem;
   }
   // Lexeme not found in the symbol table
-  return false;
+  return NULL;
 }
 
 // error handling
@@ -233,8 +238,7 @@ char *getLexeme() {
 
   if ((startPtr >= tBuff.bufferOne &&
        startPtr < tBuff.bufferOne + BUFFER_SIZE) &&
-      (endPtr >= tBuff.bufferOne &&
-       endPtr <= tBuff.bufferOne + BUFFER_SIZE)) {
+      (endPtr >= tBuff.bufferOne && endPtr <= tBuff.bufferOne + BUFFER_SIZE)) {
 
     length_lexeme = endPtr - startPtr;
   }
@@ -246,8 +250,8 @@ char *getLexeme() {
 
     length_lexeme = endPtr - startPtr;
   } else {
-    length_lexeme = tBuff.bufferOne + BUFFER_SIZE - startPtr +
-                    endPtr - tBuff.bufferTwo;
+    length_lexeme =
+        tBuff.bufferOne + BUFFER_SIZE - startPtr + endPtr - tBuff.bufferTwo;
   }
 
   lexeme = (char *)malloc((length_lexeme + 1) * sizeof(char));
@@ -259,8 +263,7 @@ char *getLexeme() {
 
   if ((startPtr >= tBuff.bufferOne &&
        startPtr < tBuff.bufferOne + BUFFER_SIZE) &&
-      (endPtr >= tBuff.bufferOne &&
-       endPtr <= tBuff.bufferOne + BUFFER_SIZE)) {
+      (endPtr >= tBuff.bufferOne && endPtr <= tBuff.bufferOne + BUFFER_SIZE)) {
 
     strncpy(lexeme, startPtr, length_lexeme);
   }
@@ -288,8 +291,7 @@ FILE *getstream(FILE *fp) {
   // If the buffer is completed, load character stream to next buffer from file
   if (endPtr == tBuff.bufferOne + BUFFER_SIZE - 1) {
     if (loadBufferTwo) {
-      size_t size =
-          fread(tBuff.bufferTwo, sizeof(char), BUFFER_SIZE, fp);
+      size_t size = fread(tBuff.bufferTwo, sizeof(char), BUFFER_SIZE, fp);
       if (size < BUFFER_SIZE) {
         tBuff.bufferTwo[size] = EOF;
       }
@@ -299,8 +301,7 @@ FILE *getstream(FILE *fp) {
     loadBufferTwo = false;
   } else if (endPtr == tBuff.bufferTwo + BUFFER_SIZE - 1) {
     if (loadBufferOne) {
-      size_t size =
-          fread(tBuff.bufferOne, sizeof(char), BUFFER_SIZE, fp);
+      size_t size = fread(tBuff.bufferOne, sizeof(char), BUFFER_SIZE, fp);
       if (size < BUFFER_SIZE) {
         tBuff.bufferOne[size] = EOF;
       }
@@ -372,11 +373,15 @@ SymTableItem tokenize(char *lex, terminals g, int line) {
 SymTableItem getToken(FILE *fp) {
   startPtr = endPtr;
   char ch = getNextCharacter(fp);
-  int dfastate = 0;
+  int dfastate = 1;
   SymTableItem newSymbolItem;
+  char *lexeme;
 
-  while (dfastate >= 0) {
-
+  while (dfastate >= 1) {
+#ifdef DEBUG
+    printf("DEBUG: dfastate = %d, char = [%c] (ASCII: %d)\n", dfastate, ch,
+           (int)ch);
+#endif
     if (isEOF) {
       newSymbolItem.eof = true;
       newSymbolItem.lexeme = NULL;
@@ -385,455 +390,387 @@ SymTableItem getToken(FILE *fp) {
     }
 
     switch (dfastate) {
-    case 0:
+    case 1:
       switch (ch) {
+      // delim
       case '\t':
         startPtr = endPtr;
         ch = getNextCharacter(fp);
         break;
+      // delim
       case ' ':
         startPtr = endPtr;
         ch = getNextCharacter(fp);
         break;
+      // newline
       case '\n':
         startPtr = endPtr;
         lineCount++;
         ch = getNextCharacter(fp);
         break;
+      // operators
       case '+':
-        return tokenize("+", TK_PLUS, lineCount);
-        dfastate = 30;
+        dfastate = 15;
         break;
       case '/':
-        dfastate = 33;
+        dfastate = 18;
         break;
       case '-':
-        dfastate = 31;
+        dfastate = 16;
         break;
       case '*':
-        dfastate = 32;
+        dfastate = 17;
         break;
       case ')':
-        return tokenize(")", TK_CL, lineCount);
-        dfastate = 29;
+        dfastate = 26;
         break;
       case ';':
-        return tokenize(";", TK_SEM, lineCount);
-        // dfastate = 25;
+        dfastate = 22;
         break;
       case ':':
-        return tokenize(":", TK_COLON, lineCount);
-        // dfastate = 26;
+        dfastate = 23;
         break;
       case '.':
-        dfastate = 27;
-        break;
-      case '(':
-        return tokenize("(", TK_CL, lineCount);
-        // dfastate = 28;
-        break;
-      case ',':
-        return tokenize(",", TK_COMMA, lineCount);
         dfastate = 24;
         break;
+      case '(':
+        dfastate = 25;
+        break;
+      case ',':
+        dfastate = 21;
+        break;
       case '~':
-        dfastate = 40;
+        dfastate = 27;
         break;
       case '@':
-        dfastate = 37;
+        dfastate = 38;
         break;
       case '[':
-        return tokenize("[", TK_SQL, lineCount);
-        // dfastate = 41;
+        dfastate = 20;
         break;
       case ']':
-        return tokenize("]", TK_SQR, lineCount);
-        // dfastate = 42;
+        dfastate = 19;
         break;
       case '%':
-        do {
-          ch = getNextCharacter(fp);
-        } while (ch != '\n' && ch != EOF);
-
-        // while((ch==getNextCharacter(fp))!='\n' && ch!=EOF){
-
-        // }
-        endPtr--;
-        return tokenize("%", TK_COMMENT, lineCount);
-        // dfastate = 56;
+        dfastate = 63;
         break;
       case '_':
-        dfastate = 7;
+        dfastate = 45;
         break;
       case '#':
-        dfastate = 11;
+        dfastate = 49;
         break;
       case '&':
-        dfastate = 34;
+        dfastate = 35;
         break;
       case '=':
-        dfastate = 43;
+        dfastate = 28;
         break;
       case '<':
-        dfastate = 47;
+        dfastate = 2;
         break;
       case '>':
-        dfastate = 53;
+        dfastate = 32;
         break;
       case '!':
-        dfastate = 45;
+        dfastate = 30;
         break;
       default:
         if (ch >= 'b' && ch <= 'd') {
-          dfastate = 1;
+          dfastate = 11;
         }
 
-        else if ((ch == 'a' || ch >= 'e')) {
-          dfastate = 5;
+        else if ((ch == 'a' || (ch >= 'e' && ch <= 'z'))) {
+          dfastate = 9;
         }
 
         else if (ch >= '0' && ch <= '9') {
-          dfastate = 14;
+          dfastate = 52;
         } else {
           dfastate = -2;
         }
       }
       break;
 
-    case 1:
-      ch = getNextCharacter(fp);
-
-      if (ch >= '2' && ch <= '7') {
-        dfastate = 2;
-      } else if (ch >= 'a' && ch <= 'z') {
-        dfastate = 5;
-      } else {
-        dfastate = -5;
-      }
-      break;
-
     case 2:
-
       ch = getNextCharacter(fp);
 
-      if (ch >= 'b' && ch <= 'd') {
-        dfastate = 2;
-      } else if (ch >= '2' && ch <= '7') {
+      if (ch == '-') {
         dfastate = 3;
       } else {
-        dfastate = 4;
+        dfastate = 8;
       }
       break;
 
     case 3:
       ch = getNextCharacter(fp);
 
-      if (ch >= '2' && ch <= '7') {
-        dfastate = 3;
-      } else {
+      if (ch == '-') {
         dfastate = 4;
-      }
-      break;
-
-    case 4:
-      endPtr--;
-      return tokenize(getLexeme(), TK_ID, lineCount);
-      break;
-
-    case 5:
-      ch = getNextCharacter(fp);
-      if (ch >= 'a' && ch <= 'z') {
-        dfastate = 5;
       } else {
         dfastate = 6;
       }
       break;
 
-    case 6:
-      endPtr--;
-      if (strcmp(getLexeme(), "|") == 0) {
-        dfastate = -2;
-      } else {
-        return tokenize(getLexeme(), TK_FIELDID, lineCount);
-      }
-      break;
-    case 7:
+    case 4:
       ch = getNextCharacter(fp);
 
-      if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')) {
-        dfastate = 8;
+      if (ch == '-') {
+        dfastate = 5;
       } else {
         dfastate = -5;
       }
+      break;
 
+    case 5:
+      return tokenize(getLexeme(), TK_ASSIGNOP, lineCount);
+      break;
+
+    case 6:
+      // Double retraction
+      endPtr--;
+      endPtr--;
+      return tokenize(getLexeme(), TK_LT, lineCount);
+      break;
+
+    case 7:
+      return tokenize(getLexeme(), TK_LE, lineCount);
       break;
 
     case 8:
-      ch = getNextCharacter(fp);
-
-      if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')) {
-        dfastate = 8;
-      } else if (ch >= '0' && ch <= '9') {
-        dfastate = 9;
-      } else {
-        dfastate = 10;
-      }
+      // Single Retraction
+      endPtr--;
+      return tokenize(getLexeme(), TK_LT, lineCount);
       break;
 
     case 9:
       ch = getNextCharacter(fp);
-
-      if (ch >= '0' && ch <= '9') {
+      if (ch >= 'a' && ch <= 'z') {
         dfastate = 9;
       } else {
         dfastate = 10;
       }
       break;
 
+    // CHECK THIS
     case 10:
       endPtr--;
-      return tokenize(getLexeme(), TK_FUNID, lineCount);
+      SymTableItem *t = lookup(getLexeme());
+      if (t) {
+        return tokenize(getLexeme(), t->token, lineCount);
+      } else {
+        return tokenize(getLexeme(), TK_FIELDID, lineCount);
+      }
       break;
-
     case 11:
-
       ch = getNextCharacter(fp);
-
       if (ch >= 'a' && ch <= 'z') {
+        dfastate = 9;
+      } else if (ch >= '2' && ch <= '7') {
         dfastate = 12;
       } else {
-        dfastate = -5;
+        dfastate = 10;
       }
       break;
 
     case 12:
-
       ch = getNextCharacter(fp);
-
-      if (ch >= 'a' && ch <= 'z') {
+      if (ch >= 'b' && ch <= 'd') {
         dfastate = 12;
-      } else {
+      } else if (ch >= '2' && ch <= '7') {
         dfastate = 13;
+      } else {
+        dfastate = 14;
       }
       break;
 
     case 13:
-      endPtr--;
-      return tokenize(getLexeme(), TK_RUID, lineCount);
+      ch = getNextCharacter(fp);
+      if (ch >= '2' && ch <= '7') {
+        dfastate = 13;
+      } else {
+        dfastate = 14;
+      }
       break;
 
+    // CHECK THIS
     case 14:
-
-      ch = getNextCharacter(fp);
-
-      if (ch == '.') {
-        dfastate = 15;
-      } else if (ch >= '0' && ch <= '9') {
-        dfastate = 14;
-      } else {
-        dfastate = 22;
-      }
-
+      endPtr--;
+      lexeme = getLexeme();
+#ifdef DEBUG
+      printf("Lexeme extracted: %s\n", lexeme); // Debug print
+      printf("Tokenized as TK_ID\n");
+#endif
+      insert(lexeme, TK_ID);
+      return tokenize(lexeme, TK_ID, lineCount);
       break;
 
     case 15:
-
-      ch = getNextCharacter(fp);
-
-      if (ch >= '0' && ch <= '9') {
-        dfastate = 16;
-      } else {
-        dfastate = -5;
-      }
-      break;
-
-    case 16:
-      ch = getNextCharacter(fp);
-
-      if (ch >= '0' && ch <= '9') {
-        dfastate = 17;
-      } else {
-        endPtr--;
-        dfastate = -5;
-      }
-      break;
-
-    case 17:
-      ch = getNextCharacter(fp);
-
-      if (ch == 'E') {
-        dfastate = 18;
-      } else {
-        dfastate = 23;
-      }
-      break;
-
-    case 18:
-      ch = getNextCharacter(fp);
-
-      if (ch == '+' || ch == '-') {
-        dfastate = 19;
-      } else if (ch >= '0' && ch <= '9') {
-        dfastate = 20;
-      } else {
-        dfastate = -5;
-      }
-      break;
-
-    case 19:
-      ch = getNextCharacter(fp);
-
-      if (ch >= '0' && ch <= '9') {
-        dfastate = 20;
-      } else {
-        dfastate = -5;
-      }
-      break;
-
-    case 20:
-      ch = getNextCharacter(fp);
-
-      if (ch >= '0' && ch <= '9') {
-        dfastate = 21;
-      } else {
-
-        dfastate = -5;
-      }
-      break;
-    case 21:
-      endPtr++;
-      dfastate = 23;
-      break;
-    case 22:
-      endPtr--;
-      return tokenize(getLexeme(), TK_NUM, lineCount);
-      break;
-
-    case 23:
-      endPtr--;
-      return tokenize(getLexeme(), TK_RNUM, lineCount);
-      break;
-
-    case 24:
-      return tokenize(getLexeme(), TK_COMMA, lineCount);
-      break;
-
-    case 25:
-      return tokenize(getLexeme(), TK_SEM, lineCount);
-      break;
-
-    case 26:
-      return tokenize(getLexeme(), TK_COLON, lineCount);
-      break;
-
-    case 27:
-      return tokenize(getLexeme(), TK_DOT, lineCount);
-      break;
-
-    case 28:
-      return tokenize(getLexeme(), TK_OP, lineCount);
-      break;
-
-    case 29:
-      return tokenize(getLexeme(), TK_CL, lineCount);
-      break;
-
-    case 30:
       return tokenize(getLexeme(), TK_PLUS, lineCount);
       break;
 
-    case 31:
+    case 16:
       return tokenize(getLexeme(), TK_MINUS, lineCount);
       break;
 
-    case 32:
+    case 17:
       return tokenize(getLexeme(), TK_MUL, lineCount);
       break;
 
-    case 33:
+    case 18:
       return tokenize(getLexeme(), TK_DIV, lineCount);
       break;
 
-    case 34:
-      ch = getNextCharacter(fp);
+    case 19:
+      return tokenize(getLexeme(), TK_SQR, lineCount);
+      break;
 
-      if (ch == '&') {
-        dfastate = 35;
+    case 20:
+      return tokenize(getLexeme(), TK_SQL, lineCount);
+      break;
+
+    case 21:
+      return tokenize(getLexeme(), TK_COMMA, lineCount);
+      break;
+
+    case 22:
+      return tokenize(getLexeme(), TK_SEM, lineCount);
+      break;
+
+    case 23:
+      return tokenize(getLexeme(), TK_COLON, lineCount);
+      break;
+
+    case 24:
+      return tokenize(getLexeme(), TK_DOT, lineCount);
+      break;
+
+    case 25:
+      return tokenize(getLexeme(), TK_OP, lineCount);
+      break;
+
+    case 26:
+      return tokenize(getLexeme(), TK_CL, lineCount);
+      break;
+
+    case 27:
+      return tokenize(getLexeme(), TK_NOT, lineCount);
+      break;
+
+    case 28:
+      ch = getNextCharacter(fp);
+      if (ch == '=') {
+        dfastate = 29;
       } else {
-        dfastate = -5;
+        dfastate = -5; // CHECK ERROR CODE
       }
+      break;
+
+    case 29:
+      return tokenize(getLexeme(), TK_EQ, lineCount);
+      break;
+
+    case 30:
+      ch = getNextCharacter(fp);
+      if (ch == '=') {
+        dfastate = 31;
+      } else {
+        dfastate = -5; // CHECK ERROR CODE
+      }
+      break;
+
+    case 31:
+      return tokenize(getLexeme(), TK_NE, lineCount);
+      break;
+
+    case 32:
+      ch = getNextCharacter(fp);
+      if (ch == '=') {
+        dfastate = 33;
+      } else {
+        dfastate = 34; // CHECK ERROR CODE
+      }
+      break;
+
+    case 33:
+      return tokenize(getLexeme(), TK_GE, lineCount);
+      break;
+
+    case 34:
+      endPtr--;
+      return tokenize(getLexeme(), TK_GT, lineCount);
       break;
 
     case 35:
       ch = getNextCharacter(fp);
-
       if (ch == '&') {
         dfastate = 36;
       } else {
-        endPtr--;
-        dfastate = -5;
+        dfastate = -5; // CHECK ERROR CODE
       }
       break;
 
     case 36:
-      return tokenize(getLexeme(), TK_AND, lineCount);
+      ch = getNextCharacter(fp);
+      if (ch == '&') {
+        dfastate = 37;
+      } else {
+        dfastate = -5; // CHECK ERROR CODE
+      }
       break;
 
     case 37:
-      ch = getNextCharacter(fp);
-
-      if (ch == '@') {
-        dfastate = 38;
-      } else {
-        dfastate = -5;
-      }
+      return tokenize(getLexeme(), TK_AND, lineCount);
       break;
 
     case 38:
       ch = getNextCharacter(fp);
-
       if (ch == '@') {
         dfastate = 39;
       } else {
-        dfastate = -5;
+        dfastate = -5; // CHECK ERROR CODE
       }
       break;
 
     case 39:
-      return tokenize(getLexeme(), TK_OR, lineCount);
-      break;
-
-    case 40:
-      return tokenize(getLexeme(), TK_NOT, lineCount);
-      break;
-
-    case 41:
-      return tokenize(getLexeme(), TK_SQL, lineCount);
-      break;
-
-    case 42:
-      return tokenize(getLexeme(), TK_SQR, lineCount);
-      break;
-
-    case 43:
       ch = getNextCharacter(fp);
-
-      if (ch == '=') {
-        dfastate = 44;
+      if (ch == '@') {
+        dfastate = 40;
       } else {
-        endPtr--;
-        dfastate = -5;
+        dfastate = -5; // CHECK ERROR CODE
       }
       break;
 
-    case 44:
-      return tokenize(getLexeme(), TK_EQ, lineCount);
+    case 40:
+      return tokenize(getLexeme(), TK_OR, lineCount);
       break;
+
+    case 41:
+      ch = getNextCharacter(fp);
+      if (ch == '\t' || ch == ' ') {
+        dfastate = 41;
+      } else {
+        dfastate = 42;
+      }
+      break;
+    // CONTINUE DIRECTLY TAKES IT TO STATE 1 WITHOUT RETURNING ANYTHING?
+    case 42:
+      endPtr--;
+      dfastate = 1;
+      break;
+      ;
+
+    case 43:
+      lineCount++;
+      dfastate = 1;
+      break;
+    // WDYM EXIT?
+    case 44:
+      exit(0);
 
     case 45:
       ch = getNextCharacter(fp);
-
-      if (ch == '=') {
+      if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')) {
         dfastate = 46;
       } else {
         dfastate = -5;
@@ -841,97 +778,172 @@ SymTableItem getToken(FILE *fp) {
       break;
 
     case 46:
-      return tokenize(getLexeme(), TK_NE, lineCount);
-      break;
-
-    case 47:
-
       ch = getNextCharacter(fp);
-
-      if (ch == '-') {
-        dfastate = 50;
-      } else if (ch == '=') {
-        return tokenize("<=", TK_LE, lineCount);
-        // dfastate = 49;
+      if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')) {
+        dfastate = 46;
+      } else if (ch >= '0' && ch <= '9') {
+        dfastate = 47;
       } else {
-        endPtr--;
-        return tokenize("<", TK_LT, lineCount);
-        // dfastate = 48;
+        dfastate = 48;
       }
       break;
 
+    case 47:
+      ch = getNextCharacter(fp);
+      if (ch >= '0' && ch <= '9') {
+        dfastate = 47;
+      } else {
+        dfastate = 48;
+      }
+      break;
+    // CHECK THIS
     case 48:
-      return tokenize(getLexeme(), TK_LT, lineCount);
+      endPtr--;
+      lexeme = getLexeme();
+#ifdef DEBUG
+      printf("Lexeme extracted: %s\n", lexeme); // Debug print
+#endif
+
+      if (strcmp(lexeme, "_main") == 0) {
+#ifdef DEBUG
+        printf("Tokenized as TK_MAIN\n");
+#endif
+        return tokenize(lexeme, TK_MAIN, lineCount);
+      } else {
+#ifdef DEBUG
+        printf("Tokenized as TK_FUNID\n");
+#endif
+        insert(lexeme, TK_FUNID);
+        return tokenize(lexeme, TK_FUNID, lineCount);
+      }
       break;
 
     case 49:
-      return tokenize(getLexeme(), TK_LE, lineCount);
+      ch = getNextCharacter(fp);
+      if (ch >= 'a' && ch <= 'z') {
+        dfastate = 50;
+      } else {
+        dfastate = -5;
+      }
       break;
 
     case 50:
       ch = getNextCharacter(fp);
-
-      if (ch == '-') {
-        dfastate = 51;
+      if (ch >= 'a' && ch <= 'z') {
+        dfastate = 50;
       } else {
-        dfastate = -5;
+        dfastate = 51;
       }
       break;
-
+    // TOKENINFO OR SYMBOL TABLE?
     case 51:
-      ch = getNextCharacter(fp);
-
-      if (ch == '-') {
-        dfastate = 52;
-      } else {
-        dfastate = -5;
-      }
+      endPtr--;
+      lexeme = getLexeme();
+#ifdef DEBUG
+      printf("Lexeme extracted: %s\n", lexeme); // Debug print
+      printf("Tokenized as TK_RUID\n");
+#endif
+      insert(lexeme, TK_RUID);
+      return tokenize(lexeme, TK_RUID, lineCount);
       break;
 
     case 52:
-      return tokenize(getLexeme(), TK_ASSIGNOP, lineCount);
+      ch = getNextCharacter(fp);
+      if (ch >= '0' && ch <= '9') {
+        dfastate = 52;
+      } else if (ch == '.') {
+        dfastate = 53;
+      } else {
+        dfastate = 61;
+      }
       break;
 
     case 53:
       ch = getNextCharacter(fp);
-
-      if (ch == '=') {
-        dfastate = 55;
-      } else {
+      if (ch >= '0' && ch <= '9') {
         dfastate = 54;
+      } else {
+        dfastate = 58;
       }
       break;
 
     case 54:
-      return tokenize(getLexeme(), TK_GT, lineCount);
+      ch = getNextCharacter(fp);
+      if (ch >= '0' && ch <= '9') {
+        dfastate = 55;
+      } else {
+        dfastate = -5;
+      }
       break;
 
     case 55:
-      return tokenize(getLexeme(), TK_GE, lineCount);
+      ch = getNextCharacter(fp);
+      if (ch == 'E') {
+        dfastate = 56;
+      } else {
+        dfastate = 59;
+      }
       break;
 
     case 56:
       ch = getNextCharacter(fp);
-
-      if (ch == '\n') {
+      if (ch == '+' || ch == '-') {
         dfastate = 57;
+      } else if (ch >= '0' && ch <= '9') {
+        dfastate = 60;
       } else {
-        dfastate = 56;
+        dfastate = -5;
       }
       break;
 
     case 57:
-      return tokenize(getLexeme(), TK_COMMENT, lineCount);
+      ch = getNextCharacter(fp);
+      if (ch >= '0' && ch <= '9') {
+        dfastate = 60;
+      } else {
+        dfastate = -5;
+      }
       break;
-    }
-    if (dfastate == -2)
+    // we haven't used a getval function as mentioned, so change implementation
+    // of tokenize if needed
+    case 58:
+      endPtr -= 2;
+      return tokenize(getLexeme(), TK_NUM, lineCount);
 
-    {
-      return error_helper(-2, getLexeme(), lineCount);
-    }
+    case 59:
+      endPtr--;
+      return tokenize(getLexeme(), TK_RNUM, lineCount);
 
-    if (dfastate == -5) {
-      return error_helper(-5, getLexeme(), lineCount);
+    case 60:
+      ch = getNextCharacter(fp);
+      if (ch >= '0' && ch <= '9') {
+        dfastate = 62;
+      } else {
+        dfastate = -5;
+      }
+      break;
+
+    // we haven't used a getval function as mentioned, so change implementation
+    // of tokenize if needed
+    case 61:
+      endPtr--;
+      return tokenize(getLexeme(), TK_NUM, lineCount);
+
+    case 62:
+      return tokenize(getLexeme(), TK_RNUM, lineCount);
+
+    // DO 63,64
+    case 63:
+      ch = getNextCharacter(fp);
+      if (ch != '\n') {
+        dfastate = 63;
+      } else {
+        dfastate = 64;
+      }
+      break;
+
+    case 64:
+      return tokenize("%%", TK_COMMENT, lineCount);
     }
   }
   newSymbolItem.lexeme = NULL;
@@ -990,34 +1002,34 @@ void freeTokenList(TokenInfo *head) {
 }
 
 int main(void) {
-      char *sourceFile = "./Lexer Test Cases/t1.txt";
-      char *cleanFile = "./Lexer Test Cases/cleaned.txt";
-  
-      removeComments(sourceFile, cleanFile);
-  
-      FILE *fp = initialise(sourceFile, BUFFER_SIZE);
-      if (!fp) {
-          fprintf(stderr, "Failed to initialize lexer with file: %s\n", cleanFile);
-          return 1;
-      }
-  
-      SymTableItem currToken;
-      int tokenCount = 0;
-      lineCount = 1; 
-  
-      while (!isEOF) {
-          currToken = getToken(fp);
-  
-          if (currToken.lexeme != NULL) {
-              printf("LineNo: %d , Token: %s, Lexeme: %s\n",currToken.lineCount,  terminalStrings[currToken.token], currToken.lexeme);
-              tokenCount++;
-          }
-      }
-  
-      printf("Total number of tokens: %d\n", tokenCount);
-  
-      fclose(fp);
-  
-      return 0;
+  char *sourceFile = "./Lexer Test Cases/t1.txt";
+  char *cleanFile = "./Lexer Test Cases/cleaned.txt";
+
+  removeComments(sourceFile, cleanFile);
+
+  FILE *fp = initialise(sourceFile, BUFFER_SIZE);
+  if (!fp) {
+    fprintf(stderr, "Failed to initialize lexer with file: %s\n", cleanFile);
+    return 1;
   }
-  
+
+  SymTableItem currToken;
+  int tokenCount = 0;
+  lineCount = 1;
+
+  while (!isEOF) {
+    currToken = getToken(fp);
+
+    if (currToken.lexeme != NULL) {
+      printf("LineNo: %d , Token: %s, Lexeme: %s\n", currToken.lineCount,
+             terminalStrings[currToken.token], currToken.lexeme);
+      tokenCount++;
+    }
+  }
+
+  printf("Total number of tokens: %d\n", tokenCount);
+
+  fclose(fp);
+
+  return 0;
+}

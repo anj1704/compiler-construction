@@ -4,7 +4,7 @@ FILE *initialise(char *inputFile, long long int buff_size);
 void initializeSymbolTable();
 int hash(char *lexeme);
 void insert(char *lexeme, terminals token);
-bool lookup(char *lexeme);
+SymTableItem *lookup(char *lexeme);
 void initializeKeywords();
 SymTableItem error_helper(int error, char *lex, int line);
 char *getLexeme();
