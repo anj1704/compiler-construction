@@ -394,19 +394,22 @@ SymTableItem getToken(FILE *fp) {
       switch (ch) {
       // delim
       case '\t':
-        startPtr = endPtr;
-        ch = getNextCharacter(fp);
+        // startPtr = endPtr;
+        // ch = getNextCharacter(fp);
+        dfastate = 41;
         break;
       // delim
       case ' ':
-        startPtr = endPtr;
-        ch = getNextCharacter(fp);
+        // startPtr = endPtr;
+        // ch = getNextCharacter(fp);
+        dfastate = 41;
         break;
       // newline
       case '\n':
-        startPtr = endPtr;
-        lineCount++;
-        ch = getNextCharacter(fp);
+        //startPtr = endPtr;
+        //lineCount++;
+        //ch = getNextCharacter(fp);
+        dfastate = 43;
         break;
       // operators
       case '+':
@@ -452,6 +455,7 @@ SymTableItem getToken(FILE *fp) {
         dfastate = 19;
         break;
       case '%':
+        // startPtr = endPtr;
         dfastate = 63;
         break;
       case '_':
@@ -746,12 +750,13 @@ SymTableItem getToken(FILE *fp) {
       break;
 
     case 41:
-      ch = getNextCharacter(fp);
       if (ch == '\t' || ch == ' ') {
         dfastate = 41;
+        startPtr = endPtr;
       } else {
         dfastate = 42;
       }
+      ch = getNextCharacter(fp);
       break;
     // CONTINUE DIRECTLY TAKES IT TO STATE 1 WITHOUT RETURNING ANYTHING?
     case 42:
@@ -761,6 +766,8 @@ SymTableItem getToken(FILE *fp) {
       ;
 
     case 43:
+      startPtr = endPtr;
+      ch = getNextCharacter(fp);
       lineCount++;
       dfastate = 1;
       break;
@@ -939,11 +946,14 @@ SymTableItem getToken(FILE *fp) {
         dfastate = 63;
       } else {
         dfastate = 64;
+        lineCount++;
       }
       break;
 
     case 64:
-      return tokenize("%%", TK_COMMENT, lineCount);
+      dfastate = 1;
+      startPtr = endPtr;
+      return tokenize("%", TK_COMMENT, lineCount-1);
     }
   }
   newSymbolItem.lexeme = NULL;
