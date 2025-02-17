@@ -406,9 +406,9 @@ SymTableItem getToken(FILE *fp) {
         break;
       // newline
       case '\n':
-        //startPtr = endPtr;
-        //lineCount++;
-        //ch = getNextCharacter(fp);
+        // startPtr = endPtr;
+        // lineCount++;
+        // ch = getNextCharacter(fp);
         dfastate = 43;
         break;
       // operators
@@ -492,6 +492,7 @@ SymTableItem getToken(FILE *fp) {
           dfastate = 52;
         } else {
           dfastate = -2;
+          lexeme = getLexeme();
         }
       }
       break;
@@ -501,6 +502,8 @@ SymTableItem getToken(FILE *fp) {
 
       if (ch == '-') {
         dfastate = 3;
+      } else if (ch == '=') {
+        dfastate = 7;
       } else {
         dfastate = 8;
       }
@@ -692,7 +695,7 @@ SymTableItem getToken(FILE *fp) {
       if (ch == '=') {
         dfastate = 33;
       } else {
-        dfastate = 34; // CHECK ERROR CODE
+        dfastate = 34;
       }
       break;
 
@@ -711,6 +714,7 @@ SymTableItem getToken(FILE *fp) {
         dfastate = 36;
       } else {
         dfastate = -5; // CHECK ERROR CODE
+        endPtr--;
       }
       break;
 
@@ -720,6 +724,7 @@ SymTableItem getToken(FILE *fp) {
         dfastate = 37;
       } else {
         dfastate = -5; // CHECK ERROR CODE
+        endPtr--;
       }
       break;
 
@@ -733,6 +738,7 @@ SymTableItem getToken(FILE *fp) {
         dfastate = 39;
       } else {
         dfastate = -5; // CHECK ERROR CODE
+        endPtr--;
       }
       break;
 
@@ -742,6 +748,7 @@ SymTableItem getToken(FILE *fp) {
         dfastate = 40;
       } else {
         dfastate = -5; // CHECK ERROR CODE
+        endPtr--;
       }
       break;
 
@@ -753,17 +760,17 @@ SymTableItem getToken(FILE *fp) {
       if (ch == '\t' || ch == ' ') {
         dfastate = 41;
         startPtr = endPtr;
+        ch = getNextCharacter(fp);
       } else {
         dfastate = 42;
       }
-      ch = getNextCharacter(fp);
       break;
     // CONTINUE DIRECTLY TAKES IT TO STATE 1 WITHOUT RETURNING ANYTHING?
     case 42:
       endPtr--;
+      ch = getNextCharacter(fp);
       dfastate = 1;
       break;
-      ;
 
     case 43:
       startPtr = endPtr;
@@ -880,6 +887,8 @@ SymTableItem getToken(FILE *fp) {
         dfastate = 55;
       } else {
         dfastate = -5;
+        // Also retracting
+        endPtr--;
       }
       break;
 
@@ -953,9 +962,14 @@ SymTableItem getToken(FILE *fp) {
     case 64:
       dfastate = 1;
       startPtr = endPtr;
-      return tokenize("%", TK_COMMENT, lineCount-1);
+      return tokenize("%", TK_COMMENT, lineCount - 1);
     }
   }
+
+  if (dfastate < 0) {
+    return error_helper(dfastate, lexeme, lineCount);
+  }
+
   newSymbolItem.lexeme = NULL;
   newSymbolItem.lineCount = -1;
   newSymbolItem.token = -1;
