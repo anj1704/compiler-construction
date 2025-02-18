@@ -5,6 +5,19 @@
 #include <string.h>
 // SHOULD WE RETRACT WHILE THROWING ERROR
 
+extern char * terminalStrings[];
+extern char * nonTerminalsStrings[];
+extern bool loadBufferOne;
+extern bool loadBufferTwo;
+extern SymTable *table;
+extern keyword* keywords[keywordCount];
+extern FILE *fp;
+extern char *endPtr, *startPtr;
+extern bool buffOneFlag, buffTwoFlag;
+extern int lineCount;
+extern bool isEOF;
+extern twinBuffer tBuff;
+
 void removeComments(char *testcaseFile, char *cleanFile) {
   FILE *testcaseFp = fopen(testcaseFile, "r");
   FILE *cleanFp = fopen(cleanFile, "w");

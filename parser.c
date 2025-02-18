@@ -2,6 +2,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+extern char * terminalStrings[];
+extern char * nonTerminalStrings[];
+extern followDS *follow_occurrence[nonTerminalCount];
+extern Grammar *G;
+extern non_terminal_sets first_follow_sets[nonTerminalCount];
+extern ParseTable *PT;
+extern helperStack *Stack;
+extern treeNode *root;
+extern gitems **itemList;
+
 gitems *createNonTerminal(nonTerminals nt) {
   gitems *item = (gitems *)malloc(sizeof(gitems));
   if (!item) {
@@ -869,11 +879,10 @@ bool createParseTree(FILE *fp) {
   }
   programNode->isT = false;
   programNode->value.non_t = program;
-  programNode->next = NULL;
+  programNode->next = parsingStack;
   parsingStack = programNode;
-  Stack->size = 1;
 
-  treeNode *root = (treeNode *)malloc(sizeof(treeNode));
+  root = (treeNode *)malloc(sizeof(treeNode));
   if (root == NULL) {
     fprintf(stderr, "Memory allocation failed for root node.\n");
     exit(EXIT_FAILURE);
@@ -894,9 +903,11 @@ bool createParseTree(FILE *fp) {
       break;
     }
     if (!top->isT) {
+    printf("non Terminal: %s\n", nonTerminalStrings[top->value.non_t]);
       ProductionRule *productionRule =
           PT->table[top->value.non_t][currentToken.token];
       if (productionRule == NULL) {
+        continue;
         fprintf(stderr,
                 "Error: No production rule found for non-terminal '%s' and "
                 "token '%s' at line %d\n",
@@ -919,6 +930,7 @@ bool createParseTree(FILE *fp) {
         currentRHS = currentRHS->next;
       }
     } else {
+    printf("Terminal: %s\n", terminalStrings[top->value.t]);
       if (top->value.t != currentToken.token) {
         fprintf(stderr, "Error: Unexpected token at '%s' at line %d\n",
                 terminalStrings[currentToken.token], currentToken.lineCount);
@@ -944,16 +956,41 @@ bool createParseTree(FILE *fp) {
         }
         sibling->rightSibling = newNode;
       }
-      currentToken = getToken(fp);
     }
-    if (parsingStack == NULL) {
-      printf("Parsing Successful.\n");
-      return true;
-    } else {
-      fprintf(stderr, "Error: Unexpected end of input\n");
-      return false;
-    }
+    currentToken = getToken(fp);
   }
+  if (parsingStack == NULL) {
+    printf("Parsing Successful.\n");
+    return true;
+  } else {
+    fprintf(stderr, "Error: Unexpected end of input\n");
+    return false;
+  }
+}
+
+void printParseTree(treeNode *node, int depth) {
+  if (node == NULL) {
+    return;
+  }
+  // Print current node
+  printParseTree(node->firstChild, depth + 1);
+  for (int i = 0; i < depth; i++) {
+    printf("  "); // Indent according to depth
+  }
+
+  if (node->isT) {
+    printf("Terminal: %s\n",
+           terminalStrings[node->v.t]); // define function getTokenName This function
+                              // takes a token type (enumeration value) as input
+                              // and returns a string representing the name or
+                              // description of that token
+  } else {
+    printf("Non-terminal: %s\n", nonTerminalStrings[node->v.non_t]);
+  }
+
+  // Print children recursively
+  printParseTree(node->rightSibling,
+                 depth); // Print right sibling at same depth
 }
 
 /*int main() {*/

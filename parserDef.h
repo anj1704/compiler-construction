@@ -84,11 +84,4 @@ typedef struct StackNode {
   struct StackNode *next;
 } StackNode;
 
-followDS *follow_occurrence[nonTerminalCount];
-Grammar *G;
-non_terminal_sets first_follow_sets[nonTerminalCount];
-ParseTable *PT;
-helperStack *Stack;
-treeNode *root;
-gitems **itemList;
 #endif
