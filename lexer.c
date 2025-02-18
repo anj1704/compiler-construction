@@ -224,7 +224,7 @@ SymTableItem error_helper(int error, char *lex, int line) {
     printf("Identified lexical error at line %d. Type: Length of function "
            "identifier more than 30 in %s\n",
            line, lex);
-  else
+  else 
     printf("Identified lexical error at line %d. Type: Wrong sequence of "
            "characters in %s\n",
            line, getLexeme());
@@ -526,6 +526,7 @@ SymTableItem getToken(FILE *fp) {
         dfastate = 5;
       } else {
         dfastate = -5;
+        endPtr--; // CHECK
       }
       break;
 
@@ -670,6 +671,7 @@ SymTableItem getToken(FILE *fp) {
         dfastate = 29;
       } else {
         dfastate = -5; // CHECK ERROR CODE
+        endPtr--;     // CHECK
       }
       break;
 
@@ -683,6 +685,7 @@ SymTableItem getToken(FILE *fp) {
         dfastate = 31;
       } else {
         dfastate = -5; // CHECK ERROR CODE
+        endPtr--;     // CHECK
       }
       break;
 
@@ -778,7 +781,7 @@ SymTableItem getToken(FILE *fp) {
       lineCount++;
       dfastate = 1;
       break;
-    // WDYM EXIT?
+    // WDYM ?
     case 44:
       exit(0);
 
@@ -788,6 +791,7 @@ SymTableItem getToken(FILE *fp) {
         dfastate = 46;
       } else {
         dfastate = -5;
+        endPtr--; // CHECK
       }
       break;
 
@@ -838,6 +842,7 @@ SymTableItem getToken(FILE *fp) {
         dfastate = 50;
       } else {
         dfastate = -5;
+        endPtr--; // CHECK
       }
       break;
 
@@ -909,6 +914,7 @@ SymTableItem getToken(FILE *fp) {
         dfastate = 60;
       } else {
         dfastate = -5;
+        endPtr--; // CHECK
       }
       break;
 
@@ -918,6 +924,7 @@ SymTableItem getToken(FILE *fp) {
         dfastate = 60;
       } else {
         dfastate = -5;
+        endPtr--; // CHECK
       }
       break;
     // we haven't used a getval function as mentioned, so change implementation
@@ -936,6 +943,7 @@ SymTableItem getToken(FILE *fp) {
         dfastate = 62;
       } else {
         dfastate = -5;
+        endPtr--; // CHECK
       }
       break;
 
