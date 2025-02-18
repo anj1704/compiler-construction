@@ -1,3 +1,5 @@
+#ifndef LEXER_DEF
+#define LEXER_DEF
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -8,7 +10,7 @@
 #define tableSize 100000000
 #define keywordCount 28
 #define terminalCount 59
-#define nonTerminalCount 54
+#define nonTerminalCount 53
 
 #define BUFFER_SIZE (1<<20) // check size of buffer
 
@@ -247,3 +249,5 @@ bool isEOF;
 bool loadBufferOne = true;
 bool loadBufferTwo = true;
 twinBuffer tBuff;
+
+#endif

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef PARSER
+#define PARSER
 #include "parserDef.h"
 gitems* createNonTerminal(nonTerminals nt);
 gitems* createTerminal(terminals t);
@@ -20,5 +21,6 @@ void populate_occ_follow();
 void find_followset(nonTerminals nt);
 void join_terminallist_exc_eps(terminal_list* list1, terminal_list* list2);
 void compute_follow();
-bool createParseTree(SymTableItem *head);
+bool createParseTree(FILE *fp);
 void printParseTree(treeNode* node, int depth);
+#endif

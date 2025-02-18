@@ -5,8 +5,6 @@
 #include <string.h>
 // SHOULD WE RETRACT WHILE THROWING ERROR
 
-SymTableItem getFunId() {}
-
 void removeComments(char *testcaseFile, char *cleanFile) {
   FILE *testcaseFp = fopen(testcaseFile, "r");
   FILE *cleanFp = fopen(cleanFile, "w");
@@ -1033,35 +1031,35 @@ void freeTokenList(TokenInfo *head) {
   }
 }
 
-int main(void) {
-  char *sourceFile = "./Lexer Test Cases/t1.txt";
-  char *cleanFile = "./Lexer Test Cases/cleaned.txt";
-
-  removeComments(sourceFile, cleanFile);
-
-  FILE *fp = initialise(sourceFile, BUFFER_SIZE);
-  if (!fp) {
-    fprintf(stderr, "Failed to initialize lexer with file: %s\n", cleanFile);
-    return 1;
-  }
-
-  SymTableItem currToken;
-  int tokenCount = 0;
-  lineCount = 1;
-
-  while (!isEOF) {
-    currToken = getToken(fp);
-
-    if (currToken.lexeme != NULL) {
-      printf("LineNo: %d , Token: %s, Lexeme: %s\n", currToken.lineCount,
-             terminalStrings[currToken.token], currToken.lexeme);
-      tokenCount++;
-    }
-  }
-
-  printf("Total number of tokens: %d\n", tokenCount);
-
-  fclose(fp);
-
-  return 0;
-}
+/*int main(void) {*/
+/*  char *sourceFile = "./Lexer Test Cases/t1.txt";*/
+/*  char *cleanFile = "./Lexer Test Cases/cleaned.txt";*/
+/**/
+/*  removeComments(sourceFile, cleanFile);*/
+/**/
+/*  FILE *fp = initialise(sourceFile, BUFFER_SIZE);*/
+/*  if (!fp) {*/
+/*    fprintf(stderr, "Failed to initialize lexer with file: %s\n", cleanFile);*/
+/*    return 1;*/
+/*  }*/
+/**/
+/*  SymTableItem currToken;*/
+/*  int tokenCount = 0;*/
+/*  lineCount = 1;*/
+/**/
+/*  while (!isEOF) {*/
+/*    currToken = getToken(fp);*/
+/**/
+/*    if (currToken.lexeme != NULL) {*/
+/*      printf("LineNo: %d , Token: %s, Lexeme: %s\n", currToken.lineCount,*/
+/*             terminalStrings[currToken.token], currToken.lexeme);*/
+/*      tokenCount++;*/
+/*    }*/
+/*  }*/
+/**/
+/*  printf("Total number of tokens: %d\n", tokenCount);*/
+/**/
+/*  fclose(fp);*/
+/**/
+/*  return 0;*/
+/*}*/

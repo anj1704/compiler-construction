@@ -1,5 +1,6 @@
-#pragma once
-#include "lexerDef.h"
+#ifndef PARSER_DEF
+#define PARSER_DEF
+#include "lexer.h"
 
 // First follow sets
 typedef struct terminal_node {
@@ -90,3 +91,4 @@ ParseTable *PT;
 helperStack *Stack;
 treeNode *root;
 gitems **itemList;
+#endif

@@ -1,3 +1,5 @@
+#ifndef LEXER
+#define LEXER
 #include "lexerDef.h"
 
 FILE *initialise(char *inputFile, long long int buff_size);
@@ -19,3 +21,4 @@ void appendTokenNode(TokenInfo **head, terminals token, char *lexeme,
                      int lineNo);
 void printTokens(TokenInfo *head);
 void freeTokenList(TokenInfo *head);
+#endif
