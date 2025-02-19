@@ -836,8 +836,45 @@ void initiate_parse_table() {
   }
 }
 
+void printFirstandFollowSets() {
+  printf("First and Follow Sets:\n");
+  for (int i = 0; i < nonTerminalCount; i++) {
+    printf("--------------------\n");
+    printf("(%d) NON-TERMINAL : %s\n", i, nonTerminalStrings[i]);
+    printf("First( %s ): ", nonTerminalStrings[i]);
+    terminal_node *first = first_follow_sets[i].first_set->head;
+    printf("{");  
+    while (first != NULL) {
+      printf("%s,", terminalStrings[first->t]);
+      first = first->next;
+    }
+    printf("}\n");
+
+    printf("Follow( %s ): ", nonTerminalStrings[i]);
+    terminal_node *follow = first_follow_sets[i].follow_set->head;
+    printf("{");
+    while (follow != NULL) {
+      printf("%s,", terminalStrings[follow->t]);
+      follow = follow->next;
+    }
+    printf("}\n");
+  }
+}
+
+void printProductionRule(int nonTerminalIdx, ProductionRule* prodRule) {
+  printf("<%s> ---> ", nonTerminalStrings[nonTerminalIdx]);
+  RHSNode* currentRHS = prodRule->head;
+  while (currentRHS != NULL) {
+    if (currentRHS->isT) {
+      printf("%s ", terminalStrings[currentRHS->v.t]);
+    } else {
+      printf("<%s> ", nonTerminalStrings[currentRHS->v.non_t]);
+    }
+    currentRHS = currentRHS->next;
+  }
+}
+
 void print_parse_table() {
-  /*printf("Parse Table:\n");*/
   printf("Non-terminals/Terminals,");
   for (int j = 0; j < terminalCount; j++) {
     printf("%s,", terminalStrings[j]);
@@ -848,18 +885,41 @@ void print_parse_table() {
     printf("%s,", nonTerminalStrings[i]);
     for (int j = 0; j < terminalCount; j++) {
       if (PT->table[i][j] != NULL) {
-        if (PT->table[i][j]->head->isT) {
-          printf("%s,", terminalStrings[PT->table[i][j]->head->v.t]);
-        } else {
-          printf("%s,", nonTerminalStrings[PT->table[i][j]->head->v.non_t]);
-        }
-      } else {
-        printf("NULL,");
+        printProductionRule(i, PT->table[i][j]);
+        printf(",");
+      }
+      else {
+        printf("-,");
       }
     }
     printf("\n");
   }
 }
+// void print_parse_table() {
+//   /*printf("Parse Table:\n");*/
+//   printf("Non-terminals/Terminals,");
+//   for (int j = 0; j < terminalCount; j++) {
+//     printf("%s,", terminalStrings[j]);
+//   }
+//   printf("\n");
+
+//   for (int i = 0; i < nonTerminalCount; i++) {
+//     printf("%s,", nonTerminalStrings[i]);
+//     for (int j = 0; j < terminalCount; j++) {
+//       if (PT->table[i][j] != NULL) {
+//         if (PT->table[i][j]->head->isT) {
+//           // printf("%s,", terminalStrings[PT->table[i][j]->head->v.t]);
+//           printProductionRule(i, PT->table[i][j]);
+//         } else {
+//           // printf("%s,", nonTerminalStrings[PT->table[i][j]->head->v.non_t]);
+//         }
+//       } else {
+//         printf("NULL,");
+//       }
+//     }
+//     printf("\n");
+//   }
+// }
 
 bool createParseTree(FILE *fp) {
   StackNode *startNode = (StackNode *)malloc(sizeof(StackNode));

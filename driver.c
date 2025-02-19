@@ -54,27 +54,27 @@ gitems **itemList;
 int main() {
   G = (Grammar *)malloc(sizeof(Grammar));
   addGrammarRules();
-  printf("Grammar rules added\n");
+  // printf("Grammar rules added\n");
   compute_firsts();
-  printf("Computed firsts\n");
+  // printf("Computed firsts\n");
   compute_follow();
-  printf("Computed follow\n");
+  // printf("Computed follow\n");
   create_parse_table();
-  printf("Created parse table\n");
+  // printf("Created parse table\n");
   initiate_parse_table();
-  /*print_parse_table();*/
+  // print_parse_table();
+  printFirstandFollowSets();
+  // char *cleanFile = "./Lexer Test Cases/cleaned.txt";
+  // removeComments(sourceFile, cleanFile);
 
-  char *sourceFile = "./Parser Test Cases/t4.txt";
-  char *cleanFile = "./Lexer Test Cases/cleaned.txt";
-  removeComments(sourceFile, cleanFile);
+  // FILE *fp = initialise(cleanFile, BUFFER_SIZE);
+  // if (!fp) {
+  //   fprintf(stderr, "Failed to initialize lexer with file: %s\n", sourceFile);
+  //   return 1;
+  // }
+  // printf("initialised file\n");
 
-  FILE *fp = initialise(cleanFile, BUFFER_SIZE);
-  if (!fp) {
-    fprintf(stderr, "Failed to initialize lexer with file: %s\n", sourceFile);
-    return 1;
-  }
-  printf("initialised file\n");
+  // createParseTree(fp);
+  // printParseTree(root, 100);
 
-  createParseTree(fp);
-  printParseTree(root, 0);
 }
