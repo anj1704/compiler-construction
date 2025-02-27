@@ -1,5 +1,5 @@
-#include "lexer.h"
-#include "parser.h"
+#include "lexer/lexer.h"
+#include "parser/parser.h"
 char* terminalStrings[] = {
     "TK_PLUS", "TK_MINUS", "TK_MUL", "TK_DIV",
     "TK_GT", "TK_LT", "TK_EQ", "TK_NE", "TK_LE", "TK_GE",
@@ -64,7 +64,7 @@ int main() {
   initiate_parse_table();
   // print_parse_table();
   printFirstandFollowSets();
-  // char *cleanFile = "./Lexer Test Cases/cleaned.txt";
+  // char *cleanFile = "../Lexer Test Cases/cleaned.txt";
   // removeComments(sourceFile, cleanFile);
 
   // FILE *fp = initialise(cleanFile, BUFFER_SIZE);

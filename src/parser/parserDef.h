@@ -1,6 +1,6 @@
 #ifndef PARSER_DEF
 #define PARSER_DEF
-#include "lexer.h"
+#include "../lexer/lexer.h"
 
 // First follow sets
 typedef struct terminal_node {
