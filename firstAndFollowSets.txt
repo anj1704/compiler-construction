@@ -1,266 +1,213 @@
 First and Follow Sets:
 --------------------
 (0) NON-TERMINAL : program
-First( program ): {TK_FUNID,EPS,TK_MAIN,}
-Follow( program ): {END_OF_INPUT,}
---------------------
+First( program ): {TK_FUNID,TK_MAIN,} count = 2
+Follow( program ): {END_OF_INPUT,} count = 1
 --------------------
 (1) NON-TERMINAL : mainFunction
-First( mainFunction ): {TK_MAIN,}
-Follow( mainFunction ): {END_OF_INPUT,}
---------------------
+First( mainFunction ): {TK_MAIN,} count = 1
+Follow( mainFunction ): {END_OF_INPUT,} count = 1
 --------------------
 (2) NON-TERMINAL : otherFunctions
-First( otherFunctions ): {TK_FUNID,}
-Follow( otherFunctions ): {TK_MAIN,}
---------------------
+First( otherFunctions ): {TK_FUNID,EPS,} count = 2
+Follow( otherFunctions ): {TK_MAIN,} count = 1
 --------------------
 (3) NON-TERMINAL : function
-First( function ): {TK_FUNID,}
-Follow( function ): {TK_FUNID,}
---------------------
+First( function ): {TK_FUNID,} count = 1
+Follow( function ): {TK_FUNID,EPS,TK_MAIN,} count = 3
 --------------------
 (4) NON-TERMINAL : stmts
-First( stmts ): {TK_RECORD,TK_UNION,TK_DEFINETYPE,EPS,TK_TYPE,TK_ID,TK_WHILE,TK_IF,TK_READ,TK_WRITE,TK_SQL,TK_CALL,TK_RETURN,}
-Follow( stmts ): {TK_END,}
---------------------
+First( stmts ): {TK_RECORD,TK_UNION,TK_DEFINETYPE,TK_TYPE,TK_ID,TK_WHILE,TK_IF,TK_READ,TK_WRITE,TK_SQL,TK_CALL,TK_RETURN,} count = 12
+Follow( stmts ): {TK_END,} count = 1
 --------------------
 (5) NON-TERMINAL : otherStmts
-First( otherStmts ): {TK_ID,TK_WHILE,TK_IF,TK_READ,TK_WRITE,TK_SQL,TK_CALL,}
-Follow( otherStmts ): {TK_ENDIF,TK_ELSE,TK_ENDWHILE,TK_RETURN,}
---------------------
+First( otherStmts ): {TK_ID,TK_WHILE,TK_IF,TK_READ,TK_WRITE,TK_SQL,TK_CALL,EPS,} count = 8
+Follow( otherStmts ): {TK_ENDIF,TK_ELSE,TK_ENDWHILE,TK_RETURN,} count = 4
 --------------------
 (6) NON-TERMINAL : stmt
-First( stmt ): {TK_ID,TK_WHILE,TK_IF,TK_READ,TK_WRITE,TK_SQL,TK_CALL,}
-Follow( stmt ): {TK_ID,TK_WHILE,TK_IF,TK_READ,TK_WRITE,TK_SQL,TK_CALL,}
---------------------
+First( stmt ): {TK_ID,TK_WHILE,TK_IF,TK_READ,TK_WRITE,TK_SQL,TK_CALL,} count = 7
+Follow( stmt ): {TK_ID,TK_WHILE,TK_IF,TK_READ,TK_WRITE,TK_SQL,TK_CALL,EPS,EPS,EPS,EPS,TK_ENDIF,TK_ELSE,TK_ENDWHILE,TK_RETURN,} count = 15
 --------------------
 (7) NON-TERMINAL : parameter_list
-First( parameter_list ): {TK_INT,TK_REAL,TK_RECORD,TK_UNION,TK_RUID,}
-Follow( parameter_list ): {TK_SQR,}
---------------------
+First( parameter_list ): {TK_INT,TK_REAL,TK_RECORD,TK_UNION,TK_RUID,} count = 5
+Follow( parameter_list ): {TK_SQR,} count = 1
 --------------------
 (8) NON-TERMINAL : input_par
-First( input_par ): {TK_INPUT,}
-Follow( input_par ): {TK_OUTPUT,EPS,TK_FUNID,}
---------------------
+First( input_par ): {TK_INPUT,} count = 1
+Follow( input_par ): {TK_OUTPUT,EPS,TK_FUNID,TK_MAIN,} count = 4
 --------------------
 (9) NON-TERMINAL : output_par
-First( output_par ): {TK_OUTPUT,EPS,}
-Follow( output_par ): {TK_SEM,}
---------------------
+First( output_par ): {TK_OUTPUT,EPS,} count = 2
+Follow( output_par ): {TK_SEM,} count = 1
 --------------------
 (10) NON-TERMINAL : inputParameters
-First( inputParameters ): {TK_SQL,}
-Follow( inputParameters ): {TK_SEM,}
---------------------
+First( inputParameters ): {TK_SQL,} count = 1
+Follow( inputParameters ): {TK_SEM,} count = 1
 --------------------
 (11) NON-TERMINAL : outputParameters
-First( outputParameters ): {TK_SQL,}
-Follow( outputParameters ): {TK_CALL,}
---------------------
+First( outputParameters ): {TK_SQL,EPS,} count = 2
+Follow( outputParameters ): {TK_CALL,} count = 1
 --------------------
 (12) NON-TERMINAL : declarations
-First( declarations ): {TK_TYPE,}
-Follow( declarations ): {TK_ID,TK_WHILE,TK_IF,TK_READ,TK_WRITE,TK_SQL,TK_CALL,}
---------------------
+First( declarations ): {TK_TYPE,EPS,} count = 2
+Follow( declarations ): {TK_ID,TK_WHILE,TK_IF,TK_READ,TK_WRITE,TK_SQL,TK_CALL,EPS,TK_END,} count = 9
 --------------------
 (13) NON-TERMINAL : declaration
-First( declaration ): {TK_TYPE,}
-Follow( declaration ): {TK_TYPE,}
---------------------
+First( declaration ): {TK_TYPE,} count = 1
+Follow( declaration ): {TK_TYPE,EPS,TK_ID,TK_WHILE,TK_IF,TK_READ,TK_WRITE,TK_SQL,TK_CALL,TK_END,} count = 10
 --------------------
 (14) NON-TERMINAL : global_or_not
-First( global_or_not ): {TK_COLON,EPS,}
-Follow( global_or_not ): {TK_SEM,}
---------------------
+First( global_or_not ): {TK_COLON,EPS,} count = 2
+Follow( global_or_not ): {TK_SEM,} count = 1
 --------------------
 (15) NON-TERMINAL : dataType
-First( dataType ): {TK_INT,TK_REAL,TK_RECORD,TK_UNION,TK_RUID,}
-Follow( dataType ): {TK_COLON,TK_ID,}
---------------------
+First( dataType ): {TK_INT,TK_REAL,TK_RECORD,TK_UNION,TK_RUID,} count = 5
+Follow( dataType ): {TK_COLON,TK_ID,} count = 2
 --------------------
 (16) NON-TERMINAL : primitiveDatatype
-First( primitiveDatatype ): {TK_INT,TK_REAL,}
-Follow( primitiveDatatype ): {TK_COLON,TK_ID,}
---------------------
+First( primitiveDatatype ): {TK_INT,TK_REAL,} count = 2
+Follow( primitiveDatatype ): {TK_COLON,TK_ID,} count = 2
 --------------------
 (17) NON-TERMINAL : constructedDatatype
-First( constructedDatatype ): {TK_RECORD,TK_UNION,TK_RUID,}
-Follow( constructedDatatype ): {TK_COLON,TK_ID,}
---------------------
+First( constructedDatatype ): {TK_RECORD,TK_UNION,TK_RUID,} count = 3
+Follow( constructedDatatype ): {TK_COLON,TK_ID,} count = 2
 --------------------
 (18) NON-TERMINAL : typeDefinitions
-First( typeDefinitions ): {TK_RECORD,TK_UNION,TK_DEFINETYPE,}
-Follow( typeDefinitions ): {TK_TYPE,}
---------------------
+First( typeDefinitions ): {TK_RECORD,TK_UNION,TK_DEFINETYPE,EPS,} count = 4
+Follow( typeDefinitions ): {TK_TYPE,EPS,TK_END,} count = 3
 --------------------
 (19) NON-TERMINAL : typeDefinition
-First( typeDefinition ): {TK_RECORD,TK_UNION,}
-Follow( typeDefinition ): {}
---------------------
+First( typeDefinition ): {TK_RECORD,TK_UNION,} count = 2
+Follow( typeDefinition ): {} count = 0
 --------------------
 (20) NON-TERMINAL : definetypestmt
-First( definetypestmt ): {TK_DEFINETYPE,}
-Follow( definetypestmt ): {}
---------------------
+First( definetypestmt ): {TK_DEFINETYPE,} count = 1
+Follow( definetypestmt ): {} count = 0
 --------------------
 (21) NON-TERMINAL : actualOrRedefined
-First( actualOrRedefined ): {TK_RECORD,TK_UNION,TK_DEFINETYPE,}
-Follow( actualOrRedefined ): {TK_RECORD,TK_UNION,TK_DEFINETYPE,}
---------------------
+First( actualOrRedefined ): {TK_RECORD,TK_UNION,TK_DEFINETYPE,} count = 3
+Follow( actualOrRedefined ): {TK_RECORD,TK_UNION,TK_DEFINETYPE,EPS,TK_TYPE,TK_END,} count = 6
 --------------------
 (22) NON-TERMINAL : fieldDefinitions
-First( fieldDefinitions ): {TK_TYPE,}
-Follow( fieldDefinitions ): {TK_ENDUNION,TK_ENDRECORD,}
---------------------
+First( fieldDefinitions ): {TK_TYPE,} count = 1
+Follow( fieldDefinitions ): {TK_ENDUNION,TK_ENDRECORD,} count = 2
 --------------------
 (23) NON-TERMINAL : fieldDefinition
-First( fieldDefinition ): {TK_TYPE,}
-Follow( fieldDefinition ): {TK_TYPE,EPS,EPS,TK_ENDUNION,TK_ENDRECORD,}
---------------------
+First( fieldDefinition ): {TK_TYPE,} count = 1
+Follow( fieldDefinition ): {TK_TYPE,EPS,EPS,TK_ENDUNION,TK_ENDRECORD,} count = 5
 --------------------
 (24) NON-TERMINAL : fieldtype
-First( fieldtype ): {TK_INT,TK_REAL,TK_RECORD,TK_UNION,TK_RUID,}
-Follow( fieldtype ): {TK_COLON,}
---------------------
+First( fieldtype ): {TK_INT,TK_REAL,TK_RECORD,TK_UNION,TK_RUID,} count = 5
+Follow( fieldtype ): {TK_COLON,} count = 1
 --------------------
 (25) NON-TERMINAL : moreFields
-First( moreFields ): {TK_TYPE,EPS,}
-Follow( moreFields ): {TK_ENDUNION,TK_ENDRECORD,}
---------------------
+First( moreFields ): {TK_TYPE,EPS,} count = 2
+Follow( moreFields ): {TK_ENDUNION,TK_ENDRECORD,} count = 2
 --------------------
 (26) NON-TERMINAL : assignmentStmt
-First( assignmentStmt ): {TK_ID,}
-Follow( assignmentStmt ): {TK_ID,TK_WHILE,TK_IF,TK_READ,TK_WRITE,TK_SQL,TK_CALL,}
---------------------
+First( assignmentStmt ): {TK_ID,} count = 1
+Follow( assignmentStmt ): {TK_ID,TK_WHILE,TK_IF,TK_READ,TK_WRITE,TK_SQL,TK_CALL,EPS,TK_ENDIF,TK_ELSE,TK_ENDWHILE,TK_RETURN,} count = 12
 --------------------
 (27) NON-TERMINAL : funCallStmt
-First( funCallStmt ): {TK_SQL,EPS,TK_CALL,}
-Follow( funCallStmt ): {TK_ID,TK_WHILE,TK_IF,TK_READ,TK_WRITE,TK_SQL,TK_CALL,}
---------------------
+First( funCallStmt ): {TK_SQL,TK_CALL,} count = 2
+Follow( funCallStmt ): {TK_ID,TK_WHILE,TK_IF,TK_READ,TK_WRITE,TK_SQL,TK_CALL,EPS,TK_ENDIF,TK_ELSE,TK_ENDWHILE,TK_RETURN,} count = 12
 --------------------
 (28) NON-TERMINAL : iterativeStmt
-First( iterativeStmt ): {TK_WHILE,}
-Follow( iterativeStmt ): {TK_ID,TK_WHILE,TK_IF,TK_READ,TK_WRITE,TK_SQL,TK_CALL,}
---------------------
+First( iterativeStmt ): {TK_WHILE,} count = 1
+Follow( iterativeStmt ): {TK_ID,TK_WHILE,TK_IF,TK_READ,TK_WRITE,TK_SQL,TK_CALL,EPS,TK_ENDIF,TK_ELSE,TK_ENDWHILE,TK_RETURN,} count = 12
 --------------------
 (29) NON-TERMINAL : conditionalStmt
-First( conditionalStmt ): {TK_IF,}
-Follow( conditionalStmt ): {TK_ID,TK_WHILE,TK_IF,TK_READ,TK_WRITE,TK_SQL,TK_CALL,}
---------------------
+First( conditionalStmt ): {TK_IF,} count = 1
+Follow( conditionalStmt ): {TK_ID,TK_WHILE,TK_IF,TK_READ,TK_WRITE,TK_SQL,TK_CALL,EPS,TK_ENDIF,TK_ELSE,TK_ENDWHILE,TK_RETURN,} count = 12
 --------------------
 (30) NON-TERMINAL : ioStmt
-First( ioStmt ): {TK_READ,TK_WRITE,}
-Follow( ioStmt ): {TK_ID,TK_WHILE,TK_IF,TK_READ,TK_WRITE,TK_SQL,TK_CALL,}
---------------------
+First( ioStmt ): {TK_READ,TK_WRITE,} count = 2
+Follow( ioStmt ): {TK_ID,TK_WHILE,TK_IF,TK_READ,TK_WRITE,TK_SQL,TK_CALL,EPS,TK_ENDIF,TK_ELSE,TK_ENDWHILE,TK_RETURN,} count = 12
 --------------------
 (31) NON-TERMINAL : returnStmt
-First( returnStmt ): {TK_RETURN,}
-Follow( returnStmt ): {TK_END,}
---------------------
+First( returnStmt ): {TK_RETURN,} count = 1
+Follow( returnStmt ): {TK_END,} count = 1
 --------------------
 (32) NON-TERMINAL : optionalReturn
-First( optionalReturn ): {TK_SQL,EPS,}
-Follow( optionalReturn ): {TK_SEM,}
---------------------
+First( optionalReturn ): {TK_SQL,EPS,} count = 2
+Follow( optionalReturn ): {TK_SEM,} count = 1
 --------------------
 (33) NON-TERMINAL : elsePart
-First( elsePart ): {TK_ELSE,TK_ENDIF,}
-Follow( elsePart ): {TK_ID,TK_WHILE,TK_IF,TK_READ,TK_WRITE,TK_SQL,TK_CALL,}
---------------------
+First( elsePart ): {TK_ELSE,TK_ENDIF,} count = 2
+Follow( elsePart ): {TK_ID,TK_WHILE,TK_IF,TK_READ,TK_WRITE,TK_SQL,TK_CALL,EPS,TK_ENDIF,TK_ELSE,TK_ENDWHILE,TK_RETURN,} count = 12
 --------------------
 (34) NON-TERMINAL : arithmeticExpression
-First( arithmeticExpression ): {TK_OP,TK_ID,TK_NUM,TK_RNUM,}
-Follow( arithmeticExpression ): {TK_CL,TK_SEM,}
---------------------
+First( arithmeticExpression ): {TK_OP,TK_ID,TK_NUM,TK_RNUM,} count = 4
+Follow( arithmeticExpression ): {TK_CL,TK_SEM,} count = 2
 --------------------
 (35) NON-TERMINAL : expPrime
-First( expPrime ): {TK_PLUS,TK_MINUS,EPS,}
-Follow( expPrime ): {TK_CL,TK_SEM,}
---------------------
+First( expPrime ): {TK_PLUS,TK_MINUS,EPS,} count = 3
+Follow( expPrime ): {TK_CL,TK_SEM,} count = 2
 --------------------
 (36) NON-TERMINAL : term
-First( term ): {TK_OP,TK_ID,TK_NUM,TK_RNUM,}
-Follow( term ): {TK_PLUS,TK_MINUS,EPS,TK_CL,TK_SEM,EPS,}
---------------------
+First( term ): {TK_OP,TK_ID,TK_NUM,TK_RNUM,} count = 4
+Follow( term ): {TK_PLUS,TK_MINUS,EPS,TK_CL,TK_SEM,EPS,} count = 6
 --------------------
 (37) NON-TERMINAL : termPrime
-First( termPrime ): {TK_MUL,TK_DIV,EPS,}
-Follow( termPrime ): {TK_PLUS,TK_MINUS,EPS,TK_CL,TK_SEM,}
---------------------
+First( termPrime ): {TK_MUL,TK_DIV,EPS,} count = 3
+Follow( termPrime ): {TK_PLUS,TK_MINUS,EPS,TK_CL,TK_SEM,} count = 5
 --------------------
 (38) NON-TERMINAL : factor
-First( factor ): {TK_OP,TK_ID,TK_NUM,TK_RNUM,}
-Follow( factor ): {TK_MUL,TK_DIV,EPS,TK_PLUS,TK_MINUS,TK_CL,TK_SEM,EPS,}
---------------------
+First( factor ): {TK_OP,TK_ID,TK_NUM,TK_RNUM,} count = 4
+Follow( factor ): {TK_MUL,TK_DIV,EPS,TK_PLUS,TK_MINUS,TK_CL,TK_SEM,EPS,} count = 8
 --------------------
 (39) NON-TERMINAL : booleanExpression
-First( booleanExpression ): {TK_OP,TK_ID,TK_NUM,TK_RNUM,TK_NOT,}
-Follow( booleanExpression ): {TK_CL,}
---------------------
+First( booleanExpression ): {TK_OP,TK_ID,TK_NUM,TK_RNUM,TK_NOT,} count = 5
+Follow( booleanExpression ): {TK_CL,} count = 1
 --------------------
 (40) NON-TERMINAL : highPrecedenceOperators
-First( highPrecedenceOperators ): {TK_MUL,TK_DIV,}
-Follow( highPrecedenceOperators ): {TK_OP,TK_ID,TK_NUM,TK_RNUM,}
---------------------
+First( highPrecedenceOperators ): {TK_MUL,TK_DIV,} count = 2
+Follow( highPrecedenceOperators ): {TK_OP,TK_ID,TK_NUM,TK_RNUM,} count = 4
 --------------------
 (41) NON-TERMINAL : lowPrecedenceOperators
-First( lowPrecedenceOperators ): {TK_PLUS,TK_MINUS,}
-Follow( lowPrecedenceOperators ): {TK_OP,TK_ID,TK_NUM,TK_RNUM,}
---------------------
+First( lowPrecedenceOperators ): {TK_PLUS,TK_MINUS,} count = 2
+Follow( lowPrecedenceOperators ): {TK_OP,TK_ID,TK_NUM,TK_RNUM,} count = 4
 --------------------
 (42) NON-TERMINAL : logicalOp
-First( logicalOp ): {TK_AND,TK_OR,}
-Follow( logicalOp ): {TK_OP,}
---------------------
+First( logicalOp ): {TK_AND,TK_OR,} count = 2
+Follow( logicalOp ): {TK_OP,} count = 1
 --------------------
 (43) NON-TERMINAL : relationalOp
-First( relationalOp ): {TK_LT,TK_LE,TK_EQ,TK_GT,TK_GE,TK_NE,}
-Follow( relationalOp ): {TK_ID,TK_NUM,TK_RNUM,}
---------------------
+First( relationalOp ): {TK_LT,TK_LE,TK_EQ,TK_GT,TK_GE,TK_NE,} count = 6
+Follow( relationalOp ): {TK_ID,TK_NUM,TK_RNUM,} count = 3
 --------------------
 (44) NON-TERMINAL : var
-First( var ): {TK_ID,TK_NUM,TK_RNUM,}
-Follow( var ): {TK_CL,TK_LT,TK_LE,TK_EQ,TK_GT,TK_GE,TK_NE,TK_MUL,TK_DIV,EPS,TK_PLUS,TK_MINUS,TK_SEM,}
---------------------
+First( var ): {TK_ID,TK_NUM,TK_RNUM,} count = 3
+Follow( var ): {TK_CL,TK_LT,TK_LE,TK_EQ,TK_GT,TK_GE,TK_NE,TK_MUL,TK_DIV,EPS,TK_PLUS,TK_MINUS,TK_SEM,} count = 13
 --------------------
 (45) NON-TERMINAL : idList
-First( idList ): {TK_ID,}
-Follow( idList ): {TK_SQR,}
---------------------
+First( idList ): {TK_ID,} count = 1
+Follow( idList ): {TK_SQR,} count = 1
 --------------------
 (46) NON-TERMINAL : more_ids
-First( more_ids ): {TK_COMMA,EPS,}
-Follow( more_ids ): {TK_SQR,}
---------------------
+First( more_ids ): {TK_COMMA,EPS,} count = 2
+Follow( more_ids ): {TK_SQR,} count = 1
 --------------------
 (47) NON-TERMINAL : singleOrRecId
-First( singleOrRecId ): {TK_ID,}
-Follow( singleOrRecId ): {TK_CL,TK_LT,TK_LE,TK_EQ,TK_GT,TK_GE,TK_NE,TK_MUL,TK_DIV,EPS,TK_PLUS,TK_MINUS,TK_SEM,TK_ASSIGNOP,}
---------------------
+First( singleOrRecId ): {TK_ID,} count = 1
+Follow( singleOrRecId ): {TK_CL,TK_LT,TK_LE,TK_EQ,TK_GT,TK_GE,TK_NE,TK_MUL,TK_DIV,EPS,TK_PLUS,TK_MINUS,TK_SEM,TK_ASSIGNOP,} count = 14
 --------------------
 (48) NON-TERMINAL : option_single_constructed
-First( option_single_constructed ): {EPS,}
-Follow( option_single_constructed ): {TK_CL,TK_LT,TK_LE,TK_EQ,TK_GT,TK_GE,TK_NE,TK_MUL,TK_DIV,EPS,TK_PLUS,TK_MINUS,TK_SEM,TK_ASSIGNOP,}
---------------------
+First( option_single_constructed ): {TK_DOT,EPS,} count = 2
+Follow( option_single_constructed ): {TK_CL,TK_LT,TK_LE,TK_EQ,TK_GT,TK_GE,TK_NE,TK_MUL,TK_DIV,EPS,TK_PLUS,TK_MINUS,TK_SEM,TK_ASSIGNOP,} count = 14
 --------------------
 (49) NON-TERMINAL : A
-First( A ): {TK_RECORD,TK_UNION,}
-Follow( A ): {TK_RUID,}
---------------------
+First( A ): {TK_RECORD,TK_UNION,} count = 2
+Follow( A ): {TK_RUID,} count = 1
 --------------------
 (50) NON-TERMINAL : remaining_list
-First( remaining_list ): {TK_COMMA,EPS,}
-Follow( remaining_list ): {TK_SQR,}
---------------------
+First( remaining_list ): {TK_COMMA,EPS,} count = 2
+Follow( remaining_list ): {TK_SQR,} count = 1
 --------------------
 (51) NON-TERMINAL : oneExpansion
-First( oneExpansion ): {TK_DOT,}
-Follow( oneExpansion ): {TK_DOT,EPS,EPS,TK_CL,TK_LT,TK_LE,TK_EQ,TK_GT,TK_GE,TK_NE,TK_MUL,TK_DIV,TK_PLUS,TK_MINUS,TK_SEM,TK_ASSIGNOP,}
---------------------
+First( oneExpansion ): {TK_DOT,} count = 1
+Follow( oneExpansion ): {TK_DOT,EPS,EPS,TK_CL,TK_LT,TK_LE,TK_EQ,TK_GT,TK_GE,TK_NE,TK_MUL,TK_DIV,TK_PLUS,TK_MINUS,TK_SEM,TK_ASSIGNOP,} count = 16
 --------------------
 (52) NON-TERMINAL : moreExpansions
-First( moreExpansions ): {TK_DOT,EPS,}
-Follow( moreExpansions ): {TK_CL,TK_LT,TK_LE,TK_EQ,TK_GT,TK_GE,TK_NE,TK_MUL,TK_DIV,EPS,TK_PLUS,TK_MINUS,TK_SEM,TK_ASSIGNOP,}
---------------------
+First( moreExpansions ): {TK_DOT,EPS,} count = 2
+Follow( moreExpansions ): {TK_FUNID,TK_MAIN,} count = 2

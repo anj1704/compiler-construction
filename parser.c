@@ -1,9 +1,10 @@
 #include "parser.h"
+#include "parserDef.h"
 #include <stdio.h>
 #include <stdlib.h>
 
-extern char * terminalStrings[];
-extern char * nonTerminalStrings[];
+extern char *terminalStrings[];
+extern char *nonTerminalStrings[];
 extern followDS *follow_occurrence[nonTerminalCount];
 extern Grammar *G;
 extern non_terminal_sets first_follow_sets[nonTerminalCount];
@@ -22,7 +23,6 @@ gitems *createNonTerminal(nonTerminals nt) {
   }
   return item;
 }
-// Function to create and populate a gitem for terminal
 gitems *createTerminal(terminals t) {
   gitems *item = (gitems *)malloc(sizeof(gitems));
   if (!item) {
@@ -82,6 +82,17 @@ terminal_node *createTerminalNode() {
   else
     node->next = NULL;
   return node;
+}
+
+followDS *createFollowDS() {
+  followDS *fol = (followDS *)malloc(sizeof(followDS));
+  if (!fol)
+    printf("Failed to allocate memory for Follow DS\n");
+  else {
+    fol->next = NULL;
+    fol->occurrence = NULL;
+  }
+  return fol;
 }
 
 void addrule(nonTerminals nt, int size, gitems value[]) {
@@ -302,10 +313,12 @@ void addGrammarRules() {
                     {false, {.non_t = option_single_constructed}}};
   addrule(singleOrRecId, 2, i25a);
 
-  gitems i25b[3] = {{true, {EPS}},
-                    {false, {.non_t = oneExpansion}},
+  gitems i25b[3] = {{false, {.non_t = oneExpansion}},
                     {false, {.non_t = moreExpansions}}};
   addrule(option_single_constructed, 3, i25b);
+
+  gitems i25p[1] = {{true, {EPS}}};
+  addrule(option_single_constructed, 1, i25p);
 
   gitems i25c[2] = {{true, {TK_DOT}}, {true, {TK_FIELDID}}};
   addrule(oneExpansion, 2, i25c);
@@ -508,44 +521,43 @@ void addGrammarRules() {
   addrule(A, 1, i47b);
 }
 
-terminal_list *compute_first_for_rhsnode(RHSNode *rhs,
-                                         terminal_list *firstset) {
-  if (rhs == NULL) {
-    return firstset;
-  }
-
-  if (rhs->isT) {
-    /*printf("terminal: %s\n", terminalStrings[rhs->v.t]);*/
-    add_terminal_tolist(firstset, rhs->v.t);
-  } else {
-    /*printf("non terminal: %s\n", nonTerminalStrings[rhs->v.non_t]);*/
-    compute_first(rhs->v.non_t);
-    join_terminal_list(firstset, first_follow_sets[rhs->v.non_t].first_set);
-
-    if (contains_epsilon(first_follow_sets[rhs->v.non_t].first_set) &&
-        rhs->next != NULL) {
-      remove_epsilon(first_follow_sets[rhs->v.non_t].first_set);
-      /*printf("remove_epsilon for %s\n", nonTerminalStrings[rhs->v.non_t]);*/
-      join_terminal_list(firstset,
-                         compute_first_for_rhsnode(rhs->next, firstset));
-    }
-  }
-  return firstset;
-}
-
 void compute_first(nonTerminals given_nt) {
-  if (first_follow_sets[given_nt].first_set == NULL) {
-    first_follow_sets[given_nt].first_set = createTerminalList();
-  } else if (first_follow_sets[given_nt].first_set->head != NULL) {
+  if (first_follow_sets[given_nt].first_set)
     return;
-  }
+
+#ifdef DEBUG
+  printf("compute_first start: %s\n", nonTerminalStrings[given_nt]);
+#endif
+  first_follow_sets[given_nt].first_set = createTerminalList();
 
   LHSNode *lhs = G->rules[given_nt];
   for (ProductionRule *rule = lhs->rules; rule != NULL;
        rule = rule->next_rule) {
-    compute_first_for_rhsnode(rule->head,
-                              first_follow_sets[given_nt].first_set);
+    for (RHSNode *rhs = rule->head; rhs != NULL; rhs = rhs->next) {
+      if (rhs->isT) {
+#ifdef DEBUG
+        printf("terminal: %s\n", terminalStrings[rhs->v.t]);
+#endif
+        add_terminal_tolist(first_follow_sets[given_nt].first_set, rhs->v.t);
+        break;
+      } else {
+#ifdef DEBUG
+        printf("non terminal: %s\n", nonTerminalStrings[rhs->v.non_t]);
+#endif
+        compute_first(rhs->v.non_t);
+        join_terminal_list(first_follow_sets[given_nt].first_set,
+                           first_follow_sets[rhs->v.non_t].first_set);
+
+        if (contains_epsilon(first_follow_sets[rhs->v.non_t].first_set)) {
+          remove_epsilon(first_follow_sets[given_nt].first_set);
+        } else
+          break;
+      }
+    }
   }
+#ifdef DEBUG
+  printf("compute_first done: %s\n", nonTerminalStrings[given_nt]);
+#endif
 }
 
 void compute_firsts() {
@@ -674,13 +686,10 @@ void compute_follow() {
 }
 
 void find_followset(nonTerminals nt) {
-  if (first_follow_sets[nt].follow_set == NULL) {
-    first_follow_sets[nt].follow_set = createTerminalList();
-  }
-
-  else if (first_follow_sets[nt].follow_set->head != NULL) {
+  if (first_follow_sets[nt].follow_set)
     return;
-  }
+
+  first_follow_sets[nt].follow_set = createTerminalList();
 
   if (nt == program) {
     add_terminal_tolist(first_follow_sets[nt].follow_set, END_OF_INPUT);
@@ -721,25 +730,20 @@ void find_followset(nonTerminals nt) {
 void populate_occ_follow() {
   for (int i = 0; i < nonTerminalCount; i++) {
     LHSNode *lhsNode = G->rules[i];
-    ProductionRule *rule = lhsNode->rules;
 
-    while (rule) {
-      RHSNode *rhs = rule->head;
+    for (ProductionRule *rule = lhsNode->rules; rule != NULL;
+         rule = rule->next_rule) {
 
-      while (rhs) {
+      for (RHSNode *rhs = rule->head; rhs != NULL; rhs = rhs->next) {
         if (!rhs->isT && rhs->v.non_t != lhsNode->lhs) {
-          followDS *newFollow = (followDS *)malloc(sizeof(followDS));
+          followDS *newFollow = createFollowDS();
 
-          if (newFollow) {
-            newFollow->occurrence = rhs;
-            newFollow->parent_nt = lhsNode->lhs;
-            newFollow->next = follow_occurrence[rhs->v.non_t];
-            follow_occurrence[rhs->v.non_t] = newFollow;
-          }
+          newFollow->occurrence = rhs;
+          newFollow->parent_nt = lhsNode->lhs;
+          newFollow->next = follow_occurrence[rhs->v.non_t];
+          follow_occurrence[rhs->v.non_t] = newFollow;
         }
-        rhs = rhs->next;
       }
-      rule = rule->next_rule;
     }
   }
 }
@@ -838,32 +842,37 @@ void initiate_parse_table() {
 
 void printFirstandFollowSets() {
   printf("First and Follow Sets:\n");
+  int count = 0;
   for (int i = 0; i < nonTerminalCount; i++) {
     printf("--------------------\n");
     printf("(%d) NON-TERMINAL : %s\n", i, nonTerminalStrings[i]);
     printf("First( %s ): ", nonTerminalStrings[i]);
     terminal_node *first = first_follow_sets[i].first_set->head;
-    printf("{");  
+    printf("{");
+    count = 0;
     while (first != NULL) {
       printf("%s,", terminalStrings[first->t]);
+      ++count;
       first = first->next;
     }
-    printf("}\n");
+    printf("} count = %d\n", count);
 
     printf("Follow( %s ): ", nonTerminalStrings[i]);
     terminal_node *follow = first_follow_sets[i].follow_set->head;
     printf("{");
+    count = 0;
     while (follow != NULL) {
       printf("%s,", terminalStrings[follow->t]);
+      ++count;
       follow = follow->next;
     }
-    printf("}\n");
+    printf("} count = %d\n", count);
   }
 }
 
-void printProductionRule(int nonTerminalIdx, ProductionRule* prodRule) {
+void printProductionRule(int nonTerminalIdx, ProductionRule *prodRule) {
   printf("<%s> ---> ", nonTerminalStrings[nonTerminalIdx]);
-  RHSNode* currentRHS = prodRule->head;
+  RHSNode *currentRHS = prodRule->head;
   while (currentRHS != NULL) {
     if (currentRHS->isT) {
       printf("%s ", terminalStrings[currentRHS->v.t]);
@@ -887,8 +896,7 @@ void print_parse_table() {
       if (PT->table[i][j] != NULL) {
         printProductionRule(i, PT->table[i][j]);
         printf(",");
-      }
-      else {
+      } else {
         printf("-,");
       }
     }
@@ -911,7 +919,8 @@ void print_parse_table() {
 //           // printf("%s,", terminalStrings[PT->table[i][j]->head->v.t]);
 //           printProductionRule(i, PT->table[i][j]);
 //         } else {
-//           // printf("%s,", nonTerminalStrings[PT->table[i][j]->head->v.non_t]);
+//           // printf("%s,",
+//           nonTerminalStrings[PT->table[i][j]->head->v.non_t]);
 //         }
 //       } else {
 //         printf("NULL,");
@@ -963,7 +972,7 @@ bool createParseTree(FILE *fp) {
       break;
     }
     if (!top->isT) {
-    printf("non Terminal: %s\n", nonTerminalStrings[top->value.non_t]);
+      printf("non Terminal: %s\n", nonTerminalStrings[top->value.non_t]);
       ProductionRule *productionRule =
           PT->table[top->value.non_t][currentToken.token];
       if (productionRule == NULL) {
@@ -990,7 +999,7 @@ bool createParseTree(FILE *fp) {
         currentRHS = currentRHS->next;
       }
     } else {
-    printf("Terminal: %s\n", terminalStrings[top->value.t]);
+      printf("Terminal: %s\n", terminalStrings[top->value.t]);
       if (top->value.t != currentToken.token) {
         fprintf(stderr, "Error: Unexpected token at '%s' at line %d\n",
                 terminalStrings[currentToken.token], currentToken.lineCount);
@@ -1040,10 +1049,11 @@ void printParseTree(treeNode *node, int depth) {
 
   if (node->isT) {
     printf("Terminal: %s\n",
-           terminalStrings[node->v.t]); // define function getTokenName This function
-                              // takes a token type (enumeration value) as input
-                              // and returns a string representing the name or
-                              // description of that token
+           terminalStrings[node->v.t]); // define function getTokenName This
+                                        // function takes a token type
+                                        // (enumeration value) as input and
+                                        // returns a string representing the
+                                        // name or description of that token
   } else {
     printf("Non-terminal: %s\n", nonTerminalStrings[node->v.non_t]);
   }
@@ -1052,26 +1062,3 @@ void printParseTree(treeNode *node, int depth) {
   printParseTree(node->rightSibling,
                  depth); // Print right sibling at same depth
 }
-
-/*int main() {*/
-/*  G = (Grammar *)malloc(sizeof(Grammar));*/
-/*  addGrammarRules();*/
-/*  printf("Grammar rules added\n");*/
-/*  compute_firsts();*/
-/*  printf("Computed firsts\n");*/
-/*  compute_follow();*/
-/*  printf("Computed follow\n");*/
-/*  create_parse_table();*/
-/*  printf("Created parse table\n");*/
-/*  initiate_parse_table();*/
-/*  print_parse_table();*/
-/**/
-/*  char *sourceFile = "./Parser Test Cases/t4.txt";*/
-/*  FILE *fp = initialise(sourceFile, BUFFER_SIZE);*/
-/*  if (!fp) {*/
-/*    fprintf(stderr, "Failed to initialize lexer with file: %s\n", sourceFile);*/
-/*    return 1;*/
-/*  }*/
-/**/
-/*  createParseTree(fp);*/
-/*}*/
