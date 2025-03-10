@@ -45,7 +45,6 @@ LHSNode *createLHSNode() {
 
 RHSNode *createRHSNode() {
   RHSNode *rhsNode = (RHSNode *)malloc(sizeof(RHSNode));
-  ;
   if (!rhsNode)
     printf("Failed to allocate memory for RHS Node\n");
   else {
@@ -700,7 +699,7 @@ void find_followset(nonTerminals nt) {
     RHSNode *nextSymbol = occurence->next;
 
     if(nextSymbol){
-      if(nextSymbol->isT){
+      if(nextSymbol->isT && (nextSymbol->v.t != EPS)){
         add_terminal_tolist(first_follow_sets[nt].follow_set, nextSymbol->v.t);
       }else{
         while(nextSymbol){
@@ -713,12 +712,12 @@ void find_followset(nonTerminals nt) {
           }
         }
         if(!nextSymbol){
-          join_terminal_list(first_follow_sets[nt].follow_set, first_follow_sets[followNode->parent_nt].follow_set);
+          join_terminallist_exc_eps(first_follow_sets[nt].follow_set, first_follow_sets[followNode->parent_nt].follow_set);
         }
       }
     }
     else {
-      join_terminal_list(first_follow_sets[nt].follow_set,
+      join_terminallist_exc_eps(first_follow_sets[nt].follow_set,
                          first_follow_sets[followNode->parent_nt].follow_set);
     }
     followNode = followNode->next;
@@ -758,7 +757,7 @@ void join_terminallist_exc_eps(terminal_list *l1, terminal_list *l2) {
     bool found = false;
 
     while (search != NULL) {
-      if ((search->t == cur->t) && (search->t != EPS)) {
+      if ((search->t == cur->t) && (search->t == EPS)) {
         found = true;
         break;
       }
