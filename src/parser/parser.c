@@ -703,11 +703,16 @@ void find_followset(nonTerminals nt) {
         add_terminal_tolist(first_follow_sets[nt].follow_set, nextSymbol->v.t);
       }else{
         while(nextSymbol){
-         terminal_list* first_set_of_next = first_follow_sets[nextSymbol->v.non_t].first_set;
-          join_terminallist_exc_eps(first_follow_sets[nt].follow_set, first_set_of_next);
-          if(contains_epsilon(first_set_of_next)){
-            nextSymbol = nextSymbol->next;
+          if(!nextSymbol->isT){
+           terminal_list* first_set_of_next = first_follow_sets[nextSymbol->v.non_t].first_set;
+            join_terminallist_exc_eps(first_follow_sets[nt].follow_set, first_set_of_next);
+            if(contains_epsilon(first_set_of_next)){
+              nextSymbol = nextSymbol->next;
+            }else{
+              break;
+            }
           }else{
+            add_terminal_tolist(first_follow_sets[nt].follow_set, nextSymbol->v.t);
             break;
           }
         }
@@ -753,11 +758,15 @@ void join_terminallist_exc_eps(terminal_list *l1, terminal_list *l2) {
   terminal_node *cur = l2->head;
 
   while (cur != NULL) {
+    if(cur->t == EPS){
+      cur = cur -> next;
+      continue;
+    }
     terminal_node *search = l1->head;
     bool found = false;
 
     while (search != NULL) {
-      if ((search->t == cur->t) && (search->t == EPS)) {
+      if ((search->t == cur->t)) {
         found = true;
         break;
       }
