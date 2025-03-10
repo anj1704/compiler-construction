@@ -548,7 +548,8 @@ void compute_first(nonTerminals given_nt) {
         join_terminal_list(first_follow_sets[given_nt].first_set,
                            first_follow_sets[rhs->v.non_t].first_set);
 
-        if (contains_epsilon(first_follow_sets[rhs->v.non_t].first_set)) {
+        // Made change to check if all non-terminals contain an EChanged
+        if (contains_epsilon(first_follow_sets[rhs->v.non_t].first_set) && (rhs->next != NULL)) {
           remove_epsilon(first_follow_sets[given_nt].first_set);
         } else
           break;
@@ -586,6 +587,7 @@ void add_terminal_tolist(terminal_list *list, terminals t) {
 
     terminal_node *newnode = createTerminalNode();
     newnode->t = t;
+    newnode->next = NULL;
 
     if (prev != NULL) {
       prev->next = newnode;
@@ -691,38 +693,34 @@ void find_followset(nonTerminals nt) {
 
   first_follow_sets[nt].follow_set = createTerminalList();
 
-  if (nt == program) {
-    add_terminal_tolist(first_follow_sets[nt].follow_set, END_OF_INPUT);
-  }
-
   followDS *followNode = follow_occurrence[nt];
 
   while (followNode) {
     RHSNode *occurence = followNode->occurrence;
     RHSNode *nextSymbol = occurence->next;
 
-    if (nextSymbol) {
-      if (nextSymbol->isT) {
+    if(nextSymbol){
+      if(nextSymbol->isT){
         add_terminal_tolist(first_follow_sets[nt].follow_set, nextSymbol->v.t);
-      } else {
-        terminal_list *firstsetOfNext =
-            first_follow_sets[nextSymbol->v.non_t].first_set;
-        join_terminallist_exc_eps(first_follow_sets[nt].follow_set,
-                                  firstsetOfNext);
-
-        if (contains_epsilon(firstsetOfNext)) {
-          join_terminal_list(
-              first_follow_sets[nt].follow_set,
-              first_follow_sets[followNode->parent_nt].follow_set);
+      }else{
+        while(nextSymbol){
+         terminal_list* first_set_of_next = first_follow_sets[nextSymbol->v.non_t].first_set;
+          join_terminallist_exc_eps(first_follow_sets[nt].follow_set, first_set_of_next);
+          if(contains_epsilon(first_set_of_next)){
+            nextSymbol = nextSymbol->next;
+          }else{
+            break;
+          }
+        }
+        if(!nextSymbol){
+          join_terminal_list(first_follow_sets[nt].follow_set, first_follow_sets[followNode->parent_nt].follow_set);
         }
       }
     }
-
     else {
       join_terminal_list(first_follow_sets[nt].follow_set,
                          first_follow_sets[followNode->parent_nt].follow_set);
     }
-
     followNode = followNode->next;
   }
 }
