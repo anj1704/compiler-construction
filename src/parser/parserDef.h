@@ -61,10 +61,10 @@ typedef struct parse_table {
 } ParseTable;
 
 // stack for maintaining non-terminals
-typedef struct stack {
-  LHSNode *top;
-  int size;
-} helperStack;
+/*typedef struct stack {*/
+/*  LHSNode *top;*/
+/*  int size;*/
+/*} helperStack;*/
 
 // follow for non-terminals initialized
 typedef struct follow {
@@ -78,10 +78,20 @@ typedef struct {
   value v;
 } gitems;
 
+/*typedef struct StackNode {*/
+/*  bool isT;*/
+/*  value value;*/
+/*  struct StackNode *next;*/
+/*} StackNode;*/
+
 typedef struct StackNode {
   bool isT;
-  value value;
+  value v;
   struct StackNode *next;
 } StackNode;
 
+typedef struct Stack {
+  int size;
+  StackNode* head;
+} Stack;
 #endif

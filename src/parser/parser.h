@@ -21,7 +21,7 @@ void populate_occ_follow();
 void find_followset(nonTerminals nt);
 void join_terminallist_exc_eps(terminal_list* list1, terminal_list* list2);
 void compute_follow();
-bool createParseTree(FILE *fp);
+void createParseTree(FILE *fp);
 void printParseTree(treeNode* node, int depth);
 void printProductionRule(int nonTerminalIdx, ProductionRule* prodRule);
 void printFirstandFollowSets();
