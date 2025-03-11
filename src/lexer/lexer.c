@@ -42,7 +42,7 @@ void removeComments(char *testcaseFile, char *cleanFile) {
 
     isComment = false;
     for (int i = 0; line[i] != '\n'; ++i) {
-      if (line[i] == ' ') {
+      if (line[i] == ' ' || line[i] == '\t') {
         continue;
       } else if (line[i] == '%') {
         isComment = true;
@@ -350,6 +350,7 @@ terminals findKeyword(char *lexeme) {
 // tokenize
 SymTableItem tokenize(char *lex, terminals g, int line) {
   SymTableItem nextSymbolItem;
+  nextSymbolItem.eof = false;
   nextSymbolItem.lexeme = lex;
   nextSymbolItem.lineCount = line;
   nextSymbolItem.token = g;

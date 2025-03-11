@@ -50,65 +50,70 @@ ParseTable *PT;
 gitems **itemList;
 Stack* mainStack;
 
-/*int main() {*/
-/*  G = (Grammar *)malloc(sizeof(Grammar));*/
-/*  mainStack = (Stack*)malloc(sizeof(Stack));*/
-/*  addGrammarRules();*/
-/*  // printf("Grammar rules added\n");*/
-/*  compute_firsts();*/
-/*  // printf("Computed firsts\n");*/
-/*  compute_follow();*/
-/*  // printf("Computed follow\n");*/
-/*  create_parse_table();*/
-/*  // printf("Created parse table\n");*/
-/*  initiate_parse_table();*/
-  /*print_parse_table();*/
-/*  //printFirstandFollowSets();*/
-/*  char *sourceFile = "./Parser Test Cases/t3.txt";*/
-/*  char *cleanFile = "./Parser Test Cases/output_3.txt";*/
-/*  removeComments(sourceFile, cleanFile);*/
-/**/
-/*  FILE *fp = initialise(cleanFile, BUFFER_SIZE);*/
-/*  if (!fp) {*/
-/*    fprintf(stderr, "Failed to initialize lexer with file: %s\n", sourceFile);*/
-/*    return 1;*/
-/*  }*/
-/*  printf("initialised file\n");*/
-/**/
-  /*createParseTree(fp);*/
-/**/
-  /*printParseTree(root, 100);*/
-/**/
-/*}*/
-int main(void) {
-  char *sourceFile = "./Lexer Test Cases/t1.txt";
-  char *cleanFile = "./Lexer Test Cases/cleaned.txt";
-
+int main() {
+  G = (Grammar *)malloc(sizeof(Grammar));
+  mainStack = (Stack*)malloc(sizeof(Stack));
+  addGrammarRules();
+  printf("Grammar rules added\n");
+  compute_firsts();
+  // printf("Computed firsts\n");
+  compute_follow();
+  // printf("Computed follow\n");
+  create_parse_table();
+  printf("Created parse table\n");
+  initiate_parse_table();
+  // print_parse_table();
+  //printFirstandFollowSets();
+  char *sourceFile = "/Users/anjaneyabajaj/Documents/Semester_3-2/CS_F363_CoCo/project/compiler-construction/Parser Test Cases/t3.txt";
+  char *cleanFile = "/Users/anjaneyabajaj/Documents/Semester_3-2/CS_F363_CoCo/project/compiler-construction/Parser Test Cases/output_3.txt";
   removeComments(sourceFile, cleanFile);
 
-  FILE *fp = initialise(sourceFile, BUFFER_SIZE);
+  FILE *fp = initialise(cleanFile, BUFFER_SIZE);
   if (!fp) {
-    fprintf(stderr, "Failed to initialize lexer with file: %s\n", cleanFile);
+    fprintf(stderr, "Failed to initialize lexer with file: %s\n", sourceFile);
     return 1;
   }
+  printf("initialised file\n");
 
-  SymTableItem currToken;
-  int tokenCount = 0;
-  lineCount = 1;
+  createParseTree(fp);
 
-  while (!isEOF) {
-    currToken = getToken(fp);
+  // printParseTree(root, 100);
 
-    if (currToken.lexeme != NULL) {
-      printf("LineNo: %d , Token: %s, Lexeme: %s\n", currToken.lineCount,
-             terminalStrings[currToken.token], currToken.lexeme);
-      tokenCount++;
-    }
-  }
-
-  printf("Total number of tokens: %d\n", tokenCount);
-
-  fclose(fp);
-
-  return 0;
+  // printAllProductionRules(moreExpansions);
+  // printf("\n");
+  // printAllProductionRules(option_single_constructed);
+  // printf("\n");
 }
+
+// int main(void) {
+//   char *sourceFile = "./Parser Test Cases/t3.txt";
+//   char *cleanFile = "./Parser Test Cases/cleaned.txt";
+
+//   removeComments(sourceFile, cleanFile);
+
+//   FILE *fp = initialise(cleanFile, BUFFER_SIZE);
+//   if (!fp) {
+//     fprintf(stderr, "Failed to initialize lexer with file: %s\n", cleanFile);
+//     return 1;
+//   }
+
+//   SymTableItem currToken;
+//   int tokenCount = 0;
+//   lineCount = 1;
+
+//   while (!isEOF) {
+//     currToken = getToken(fp);
+
+//     if (currToken.lexeme != NULL) {
+//       printf("LineNo: %d , Token: %s, Lexeme: %s\n", currToken.lineCount,
+//              terminalStrings[currToken.token], currToken.lexeme);
+//       tokenCount++;
+//     }
+//   }
+
+//   printf("Total number of tokens: %d\n", tokenCount);
+
+//   fclose(fp);
+
+//   return 0;
+// }

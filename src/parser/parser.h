@@ -25,4 +25,5 @@ void createParseTree(FILE *fp);
 void printParseTree(treeNode* node, int depth);
 void printProductionRule(int nonTerminalIdx, ProductionRule* prodRule);
 void printFirstandFollowSets();
+void printAllProductionRules(int nonTerminalIdx); 
 #endif

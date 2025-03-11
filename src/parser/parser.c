@@ -311,9 +311,9 @@ void addGrammarRules() {
                     {false, {.non_t = option_single_constructed}}};
   addrule(singleOrRecId, 2, i25a);
 
-  gitems i25b[3] = {{false, {.non_t = oneExpansion}},
+  gitems i25b[2] = {{false, {.non_t = oneExpansion}},
                     {false, {.non_t = moreExpansions}}};
-  addrule(option_single_constructed, 3, i25b);
+  addrule(option_single_constructed, 2, i25b);
 
   gitems i25p[1] = {{true, {EPS}}};
   addrule(option_single_constructed, 1, i25p);
@@ -932,20 +932,34 @@ void pushListToStack(RHSNode* currNode){
     temp = temp->next;
     ++(mainStack->size);
   }
-  prevStackNode->next = mainStack->head;
+  currStackNode->next = mainStack->head;
   mainStack->head = newHead;
+}
+
+void printStack() {
+  printf("\n\n Printing Stack \n\n");
+  StackNode *temp = mainStack->head;
+  while (temp != NULL) {
+    if (temp->isT) {
+      printf("Terminal: %s\n", terminalStrings[temp->v.t]);
+    } else {
+      printf("Non-terminal: %s\n", nonTerminalStrings[temp->v.non_t]);
+    }
+    temp = temp->next;
+  }
+  printf("\n Stack Print over\n\n");
 }
 
 void createParseTree(FILE* fp){
   push(END_OF_INPUT, 1);
   push(program, 0);
   SymTableItem currToken = getToken(fp);
-  while(!isEmpty()){
+  while(!isEmpty() && currToken.eof == false){
     StackNode* currNode = top();
     if(currNode->isT){
-      printf("Terminal: %s\n", terminalStrings[currNode->v.t]);
+      printf("Terminal: %s\n\n", terminalStrings[currNode->v.t]);
     }else{
-      printf("Non-terminal: %s\n", nonTerminalStrings[currNode->v.non_t]);
+      printf("Non-terminal: %s\n\n", nonTerminalStrings[currNode->v.non_t]);
     }
     if(currNode->isT){
       if(currToken.token == currNode->v.t){
@@ -964,10 +978,15 @@ void createParseTree(FILE* fp){
         }
       }else{
         printf("Rule does not exist in the parse table\n");
+        break;
       }
     }
   }
-  printf("Parsed the entire tree");
+  if (mainStack->size == 1 && currToken.eof == true) {
+    printf("Parsed the entire tree\n");
+  } else {
+    printf("Error in parsing\n");
+  }
 }
 
 void printFirstandFollowSets() {
@@ -1010,6 +1029,18 @@ void printProductionRule(int nonTerminalIdx, ProductionRule *prodRule) {
       printf("<%s> ", nonTerminalStrings[currentRHS->v.non_t]);
     }
     currentRHS = currentRHS->next;
+  }
+}
+
+void printAllProductionRules(int nonTerminalIdx) {
+  LHSNode *lhs = G->rules[nonTerminalIdx];
+  printf("Non-terminal: %s\n", nonTerminalStrings[nonTerminalIdx]);
+  ProductionRule *rule = lhs->rules;
+  while (rule != NULL)
+  {
+    printProductionRule(nonTerminalIdx, rule);
+    printf("\n");
+    rule = rule->next_rule;
   }
 }
 
