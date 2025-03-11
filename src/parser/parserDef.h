@@ -24,20 +24,28 @@ typedef union u {
 } value;
 
 // parse tree
-typedef struct tree_node {
-  struct tree_node *parent;
-  struct tree_node *firstChild;
-  struct tree_node *rightSibling;
-  SymTableItem *token_ptr; // Pointer to the token associated with the node
+/*typedef struct tree_node {*/
+/*  struct tree_node *parent;*/
+/*  struct tree_node *firstChild;*/
+/*  struct tree_node *rightSibling;*/
+/*  SymTableItem *token_ptr; // Pointer to the token associated with the node*/
+/*  bool isT;*/
+/*  value v;*/
+/*} treeNode;*/
+
+typedef struct treeNode{
+  struct treeNode *parent;
+  struct treeNode *firstChild;
+  struct treeNode* next;
+  struct StackNode* stackNode;
   bool isT;
   value v;
-} treeNode;
+} TreeNode;
 
 typedef struct rhs_node {
   bool isT; // Indicates whether it's a terminal or non-terminal
   value v;
   struct rhs_node *next; // Pointer to the next node in the list
-  treeNode *ptr;
 } RHSNode;
 
 // A linked list containing a production rule
@@ -88,6 +96,7 @@ typedef struct StackNode {
   bool isT;
   value v;
   struct StackNode *next;
+  struct treeNode *treeNode;
 } StackNode;
 
 typedef struct Stack {

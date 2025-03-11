@@ -22,7 +22,7 @@ void find_followset(nonTerminals nt);
 void join_terminallist_exc_eps(terminal_list* list1, terminal_list* list2);
 void compute_follow();
 void createParseTree(FILE *fp);
-void printParseTree(treeNode* node, int depth);
+/*void printParseTree(treeNode* node, int depth);*/
 void printProductionRule(int nonTerminalIdx, ProductionRule* prodRule);
 void printFirstandFollowSets();
 void printAllProductionRules(int nonTerminalIdx); 

@@ -49,10 +49,12 @@ non_terminal_sets first_follow_sets[nonTerminalCount];
 ParseTable *PT;
 gitems **itemList;
 Stack* mainStack;
+TreeNode* parseTreeRoot;
 
 int main() {
   G = (Grammar *)malloc(sizeof(Grammar));
   mainStack = (Stack*)malloc(sizeof(Stack));
+  parseTreeRoot = (TreeNode*)malloc(sizeof(TreeNode));
   addGrammarRules();
   printf("Grammar rules added\n");
   compute_firsts();
@@ -64,8 +66,8 @@ int main() {
   initiate_parse_table();
   // print_parse_table();
   //printFirstandFollowSets();
-  char *sourceFile = "/Users/anjaneyabajaj/Documents/Semester_3-2/CS_F363_CoCo/project/compiler-construction/Parser Test Cases/t3.txt";
-  char *cleanFile = "/Users/anjaneyabajaj/Documents/Semester_3-2/CS_F363_CoCo/project/compiler-construction/Parser Test Cases/output_3.txt";
+  char *sourceFile = "/home/sundar/Desktop/compiler-construction/Parser Test Cases/t6.txt";
+  char *cleanFile = "/home/sundar/Desktop/compiler-construction/Parser Test Cases/output_3.txt";
   removeComments(sourceFile, cleanFile);
 
   FILE *fp = initialise(cleanFile, BUFFER_SIZE);

@@ -11,6 +11,7 @@ extern non_terminal_sets first_follow_sets[nonTerminalCount];
 extern ParseTable *PT;
 extern gitems **itemList;
 extern Stack* mainStack;
+extern TreeNode* parseTreeRoot;
 
 gitems *createNonTerminal(nonTerminals nt) {
   gitems *item = (gitems *)malloc(sizeof(gitems));
@@ -48,7 +49,6 @@ RHSNode *createRHSNode() {
     printf("Failed to allocate memory for RHS Node\n");
   else {
     rhsNode->next = NULL;
-    rhsNode->ptr = NULL;
   }
   return rhsNode;
 }
@@ -910,12 +910,22 @@ bool isEmpty(){
   return (mainStack->size == 0 && mainStack->head == NULL) ? true : false;
 }
 
-void pushListToStack(RHSNode* currNode){
+
+TreeNode* pushListToStack(RHSNode* currNode, TreeNode* parent){
 
   StackNode* newHead = (StackNode*)malloc(sizeof(StackNode));
   newHead->isT = currNode->isT;
   newHead->v = currNode->v;
   ++(mainStack->size);
+
+  TreeNode* newTreeNode = (TreeNode*)malloc(sizeof(TreeNode));
+  newTreeNode->isT = currNode->isT;
+  newTreeNode->v = currNode->v;
+  newTreeNode->parent = parent;
+  newTreeNode->next = NULL;
+  parent->firstChild = newTreeNode;
+  newTreeNode->stackNode = newHead;
+  newHead->treeNode = newTreeNode;
 
   StackNode* prevStackNode = NULL;
   StackNode* currStackNode = newHead;
@@ -926,6 +936,18 @@ void pushListToStack(RHSNode* currNode){
     StackNode* tempStackNode = (StackNode*)malloc(sizeof(StackNode));
     tempStackNode->isT = temp->isT;
     tempStackNode->v = temp->v;
+
+    TreeNode* tempTreeNode = (TreeNode*)malloc(sizeof(TreeNode));
+    tempTreeNode->isT = temp->isT;
+    tempTreeNode->v = temp->v;
+    tempTreeNode->parent = parent;
+    tempTreeNode->firstChild = NULL;
+    tempTreeNode->stackNode = tempStackNode;
+    tempStackNode->treeNode = tempTreeNode;
+
+    if(prevStackNode) tempTreeNode->next = prevStackNode->treeNode;
+    else tempTreeNode->next = NULL;
+
     currStackNode->next = tempStackNode;
     prevStackNode = currStackNode;
     currStackNode = currStackNode->next;
@@ -934,6 +956,7 @@ void pushListToStack(RHSNode* currNode){
   }
   currStackNode->next = mainStack->head;
   mainStack->head = newHead;
+  return newTreeNode; 
 }
 
 void printStack() {
@@ -953,7 +976,16 @@ void printStack() {
 void createParseTree(FILE* fp){
   push(END_OF_INPUT, 1);
   push(program, 0);
+
+  parseTreeRoot->parent = NULL;
+  parseTreeRoot->firstChild = NULL;
+  parseTreeRoot->next = NULL;
+  parseTreeRoot->isT = false;
+  parseTreeRoot->v.non_t = program;
+
   SymTableItem currToken = getToken(fp);
+  TreeNode* currTreeNode = parseTreeRoot;
+
   while(!isEmpty() && currToken.eof == false){
     StackNode* currNode = top();
     if(currNode->isT){
@@ -964,6 +996,14 @@ void createParseTree(FILE* fp){
     if(currNode->isT){
       if(currToken.token == currNode->v.t){
         pop();
+
+        TreeNode *terminalTreeNode = (TreeNode*)malloc(sizeof(TreeNode));
+        terminalTreeNode->isT = true;
+        terminalTreeNode->v.t = currNode->v.t;
+        terminalTreeNode->parent = currNode->treeNode;
+        terminalTreeNode->next = NULL;
+        terminalTreeNode->firstChild = NULL;
+
         currToken = getToken(fp);
       }else{
         printf("Throws error\n");
@@ -974,7 +1014,8 @@ void createParseTree(FILE* fp){
         pop();
         RHSNode* temp = pr->head;
         if(!(temp->isT && temp->v.t == EPS)){
-          pushListToStack(temp);
+          TreeNode* firstChild = pushListToStack(temp, currNode->treeNode);
+          currNode->treeNode->firstChild = firstChild;
         }
       }else{
         printf("Rule does not exist in the parse table\n");
@@ -1064,6 +1105,7 @@ void print_parse_table() {
     printf("\n");
   }
 }
+
 // void print_parse_table() {
 //   /*printf("Parse Table:\n");*/
 //   printf("Non-terminals/Terminals,");
