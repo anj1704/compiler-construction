@@ -66,7 +66,7 @@ int main() {
   initiate_parse_table();
   // print_parse_table();
   //printFirstandFollowSets();
-  char *sourceFile = "/home/sundar/Desktop/compiler-construction/Parser Test Cases/t6.txt";
+  char *sourceFile = "/home/sundar/Desktop/compiler-construction/Parser Test Cases/t3.txt";
   char *cleanFile = "/home/sundar/Desktop/compiler-construction/Parser Test Cases/output_3.txt";
   removeComments(sourceFile, cleanFile);
 
@@ -78,6 +78,7 @@ int main() {
   printf("initialised file\n");
 
   createParseTree(fp);
+  printParseTree();
 
   // printParseTree(root, 100);
 
