@@ -62,8 +62,8 @@ int main() {
   create_parse_table();
   // printf("Created parse table\n");
   initiate_parse_table();
-  // print_parse_table();
-  printFirstandFollowSets();
+  print_parse_table();
+  //printFirstandFollowSets();
   // char *cleanFile = "../Lexer Test Cases/cleaned.txt";
   // removeComments(sourceFile, cleanFile);
 

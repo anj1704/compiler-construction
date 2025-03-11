@@ -813,37 +813,65 @@ void create_parse_table() {
 }
 
 void initiate_parse_table() {
-  for (int i = 0; i < nonTerminalCount; i++) {
-    LHSNode *current_lhs = G->rules[i];
-    if (!current_lhs)
-      continue;
-    ProductionRule *current_rule = current_lhs->rules;
-    while (current_rule != NULL) {
-      RHSNode *rhs_node = current_rule->head;
-      while (rhs_node != NULL) {
-        if (rhs_node->isT) {
-          if (rhs_node->v.t == EPS) {
-            terminal_node *first_terminal =
-                first_follow_sets[i].follow_set->head;
-            while (first_terminal != NULL) {
-              PT->table[i][first_terminal->t] = current_rule;
-              first_terminal = first_terminal->next;
+    for (int i = 0; i < nonTerminalCount; i++) {
+        LHSNode *current_lhs = G->rules[i];
+        if (!current_lhs) continue;
+
+        ProductionRule *current_rule = current_lhs->rules;
+
+        while (current_rule != NULL) {
+            RHSNode *rhs_node = current_rule->head;
+            int nullable_chain = 1; 
+
+            if (rhs_node == NULL) {
+                terminal_node *follow_terminal =
+                    first_follow_sets[i].follow_set->head;
+
+                while (follow_terminal != NULL) {
+                    PT->table[i][follow_terminal->t] = current_rule;
+                    follow_terminal = follow_terminal->next;
+                }
+                current_rule = current_rule->next_rule;
+                continue;
             }
-          }
-          PT->table[i][rhs_node->v.t] = current_rule;
-        } else {
-          terminal_node *first_terminal =
-              first_follow_sets[rhs_node->v.non_t].first_set->head;
-          while (first_terminal != NULL) {
-            PT->table[i][first_terminal->t] = current_rule;
-            first_terminal = first_terminal->next;
-          }
+
+            while (rhs_node != NULL) {
+                if (rhs_node->isT) {
+                    if (rhs_node->v.t != EPS) {
+                        PT->table[i][rhs_node->v.t] = current_rule;
+                        nullable_chain = 0; 
+                    }
+                    break;
+                } else {
+                    terminal_node *first_terminal =
+                    first_follow_sets[rhs_node->v.non_t].first_set->head;
+
+                    while (first_terminal != NULL) {
+                        if (first_terminal->t != EPS) {
+                            PT->table[i][first_terminal->t] = current_rule;
+                        }
+                        first_terminal = first_terminal->next;
+                    }
+
+                    if (!contains_epsilon(first_follow_sets[rhs_node->v.non_t].first_set)) {
+                        nullable_chain = 0;
+                        break;
+                    }
+                    rhs_node = rhs_node->next;
+                }
+            }
+            if (nullable_chain) {
+                terminal_node *follow_terminal =
+                    first_follow_sets[i].follow_set->head;
+                while (follow_terminal != NULL) {
+                    PT->table[i][follow_terminal->t] = current_rule;
+                    follow_terminal = follow_terminal->next;
+                }
+            }
+
+            current_rule = current_rule->next_rule;
         }
-        rhs_node = rhs_node->next;
-      }
-      current_rule = current_rule->next_rule;
     }
-  }
 }
 
 void printFirstandFollowSets() {
