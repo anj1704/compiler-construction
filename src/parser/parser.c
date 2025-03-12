@@ -1112,17 +1112,27 @@ void dfsHelper(TreeNode* currTreeNode){
   }
   if(currTreeNode->isT){
     if (currTreeNode->token.token == TK_NUM) {
-      printf("\t%s\t%d\t%s\t%d\t%s\t%s\t%s\n", currTreeNode->token.lexeme, currTreeNode->token.lineCount, terminalStrings[currTreeNode->v.t], currTreeNode->token.intVal, nonTerminalStrings[currTreeNode->parent->v.non_t], "yes", "----"); 
+      printf("|%-25s|%-25d|%-25s|%-25d|%-25s|%-25s|%-25s|\n", currTreeNode->token.lexeme, currTreeNode->token.lineCount, terminalStrings[currTreeNode->v.t], currTreeNode->token.intVal, nonTerminalStrings[currTreeNode->parent->v.non_t], "YES", "----");
     } 
     else if (currTreeNode->token.token == TK_RNUM){
-      printf("\t%s\t%d\t%s\t%d\t%s\t%s\t%s\n", currTreeNode->token.lexeme, currTreeNode->token.lineCount, terminalStrings[currTreeNode->v.t], currTreeNode->token.realVal, nonTerminalStrings[currTreeNode->parent->v.non_t], "yes", "----"); 
+      printf("|%-25s|%-25d|%-25s|%-25d|%-25s|%-25s|%-25s|\n", currTreeNode->token.lexeme, currTreeNode->token.lineCount, terminalStrings[currTreeNode->v.t], currTreeNode->token.realVal, nonTerminalStrings[currTreeNode->parent->v.non_t], "YES", "----");
     }
-    printf("\t%s\t%d\t%s\t%d\t%s\t%s\t%s\n", currTreeNode->token.lexeme, currTreeNode->token.lineCount, terminalStrings[currTreeNode->v.t], -1, nonTerminalStrings[currTreeNode->parent->v.non_t],"yes","----"); 
+    else if (currTreeNode->token.token == TK_ID || currTreeNode->token.token == TK_FUNID || currTreeNode->token.token == TK_FIELDID || currTreeNode->token.token == TK_RUID){ 
+      printf("|%-25s|%-25d|%-25s|%-25s|%-25s|%-25s|%-25s|\n", currTreeNode->token.lexeme, currTreeNode->token.lineCount, terminalStrings[currTreeNode->v.t], "NO_VAL", nonTerminalStrings[currTreeNode->parent->v.non_t], "YES", "----");
+    }
+    else{
+      printf("|%-25s|%-25d|%-25s|%-25s|%-25s|%-25s|%-25s|\n", "----", currTreeNode->token.lineCount, terminalStrings[currTreeNode->v.t], "NO_VAL", nonTerminalStrings[currTreeNode->parent->v.non_t], "YES", "----");
+    }
   }else if (currTreeNode->v.non_t == program){
-    printf("\t%s\t%d\t%s\t%d\t%s\t%s\t%s\n", "----", -1, nonTerminalStrings[currTreeNode->v.non_t], -1, "ROOT","no", nonTerminalStrings[currTreeNode->v.non_t]);
+    printf("|%-25s|%-25s|%-25s|%-25s|%-25s|%-25s|%-25s|\n", "----", "NO_LINE", nonTerminalStrings[currTreeNode->v.non_t], "NO_VAL", "ROOT", "NO", "----");
   }else{
-    printf("\t%s\t%d\t%s\t%d\t%s\t%s\t%s\n", "----", -1, nonTerminalStrings[currTreeNode->v.non_t], -1, nonTerminalStrings[currTreeNode->parent->v.non_t],"no", nonTerminalStrings[currTreeNode->v.non_t]);
+    printf("|%-25s|%-25s|%-25s|%-25d|%-25s|%-25s|%-25s|\n", "----", "NO_LINE", nonTerminalStrings[currTreeNode->v.non_t], "NO_VAL", nonTerminalStrings[currTreeNode->parent->v.non_t], "NO", "----");
   }
+  printf("|");
+  for (int i = 0; i < 181; ++i) {
+    printf("-");
+  }
+  printf("|\n");
   dfsHelper(prev);
 }
 
@@ -1143,6 +1153,17 @@ void printTreeHelper(TreeNode* currTreeNode){
 }
 
 void printParseTree(){
+  printf("|");
+  for (int i = 0; i < 181; ++i) {
+    printf("-");
+  }
+  printf("|\n");
+  printf("|%-25s|%-25s|%-25s|%-25s|%-25s|%-25s|%-25s|\n", "Lexeme", "Line No.", "Token", "Value", "Parent Node", "Leaf Node", "Node Symbol");
+  printf("|");
+  for (int i = 0; i < 181; ++i) {
+    printf("-");
+  }
+  printf("|\n");
   dfsHelper(parseTreeRoot);
   // printTreeHelper(parseTreeRoot);
 }
