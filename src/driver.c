@@ -58,19 +58,18 @@ int main() {
   addGrammarRules();
   printf("Grammar rules added\n");
   compute_firsts();
-  // printf("Computed firsts\n");
+  printf("Computed firsts\n");
   compute_follow();
-  // printf("Computed follow\n");
+  printf("Computed follow\n");
   create_parse_table();
   printf("Created parse table\n");
   initiate_parse_table();
   // print_parse_table();
   //printFirstandFollowSets();
-  // assuming we are running with makefile in the compiler-construction directory
-  char *sourceFile = "./Parser Test Cases/t8.txt";
+  char *sourceFile = "./Parser Test Cases/t6.txt";
   char *cleanFile = "./Parser Test Cases/cleaned.txt";
   removeComments(sourceFile, cleanFile);
-
+  
   FILE *fp = initialise(cleanFile, BUFFER_SIZE);
   if (!fp) {
     fprintf(stderr, "Failed to initialize lexer with file: %s\n", sourceFile);
@@ -81,12 +80,13 @@ int main() {
   createParseTree(fp);
   printParseTree();
 
-  // printParseTree(root, 100);
-
+  // cleanUp();
   // printAllProductionRules(moreExpansions);
   // printf("\n");
   // printAllProductionRules(option_single_constructed);
   // printf("\n");
+
+  return 0;
 }
 
 // int main(void) {

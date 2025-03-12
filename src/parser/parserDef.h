@@ -67,6 +67,7 @@ typedef struct grammar {
 
 typedef struct parse_table {
   ProductionRule *table[nonTerminalCount][terminalCount];
+  bool isSyn[nonTerminalCount][terminalCount];
 } ParseTable;
 
 // stack for maintaining non-terminals

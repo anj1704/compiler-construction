@@ -807,6 +807,10 @@ void create_parse_table() {
   for (int i = 0; i < nonTerminalCount; i++) {
     for (int j = 0; j < terminalCount; j++) {
       PT->table[i][j] = NULL;
+      PT->isSyn[i][j] = false;
+      if (j == TK_SEM || j == TK_END || j == TK_ENDIF || j == TK_ENDRECORD || j == TK_ENDUNION || j == TK_ENDWHILE || j == TK_ELSE || j == TK_SQR || j == TK_CL) {
+        PT->isSyn[i][j] = true;
+      }
     }
   }
 }
@@ -854,6 +858,12 @@ void initiate_parse_table() {
 
           if (!contains_epsilon(first_follow_sets[rhs_node->v.non_t].first_set)) {
             nullable_chain = 0;
+            terminal_node *follow_terminal = first_follow_sets[i].follow_set->head;
+            while (follow_terminal != NULL)
+            {
+              PT->isSyn[i][follow_terminal->t] = true;
+              follow_terminal = follow_terminal->next;
+            }
             break;
           }
           rhs_node = rhs_node->next;
@@ -960,7 +970,9 @@ TreeNode* pushListToStack(RHSNode* currNode, StackNode* parent){
 #endif
     if (prevStackNode) {
       currStackNode->treeNode->next = tempTreeNode;
+#ifdef DEBUG
       printf("%s\n", prevStackNode->treeNode->isT ? terminalStrings[prevStackNode->treeNode->v.t] : nonTerminalStrings[prevStackNode->treeNode->v.non_t]);
+#endif
     }else{
       newTreeNode->next = tempTreeNode;
     }
@@ -974,20 +986,6 @@ TreeNode* pushListToStack(RHSNode* currNode, StackNode* parent){
   currStackNode->next = mainStack->head;
   mainStack->head = newHead;
   return newTreeNode; 
-}
-
-void printStack() {
-  printf("\n\n Printing Stack \n\n");
-  StackNode *temp = mainStack->head;
-  while (temp != NULL) {
-    if (temp->isT) {
-      printf("Terminal: %s\n", terminalStrings[temp->v.t]);
-    } else {
-      printf("Non-terminal: %s\n", nonTerminalStrings[temp->v.non_t]);
-    }
-    temp = temp->next;
-  }
-  printf("\n Stack Print over\n\n");
 }
 
 void createParseTree(FILE* fp){
@@ -1027,7 +1025,18 @@ void createParseTree(FILE* fp){
         pop();
         currToken = getToken(fp);
       }else{
-        printf("Throws error\n");
+        printf("Line %d Error: The token %s for lexeme %s does not match expected token %s\n", currToken.lineCount, terminalStrings[currToken.token], currToken.lexeme, terminalStrings[currNode->v.t]);
+        while(currToken.token != currNode->v.t && currToken.eof == false && mainStack->size > 1){
+          if (PT->isSyn[currNode->v.non_t][currToken.token]) {
+            if (PT->table[currNode->v.non_t][currToken.token]) {
+              break;
+            }
+            else {
+              pop();
+            }
+          }
+          currToken = getToken(fp);
+        }
       }
     }else{
       ProductionRule* pr = PT->table[currNode->v.non_t][currToken.token];
@@ -1049,15 +1058,28 @@ void createParseTree(FILE* fp){
           currNode->treeNode->firstChild = firstChild;
         }
       }else{
-        printf("Rule does not exist in the parse table\n");
-        break;
+        printf("Line %d Error: Invalid token %s encountered with value %s stack top %s\n", currToken.lineCount, terminalStrings[currToken.token], currToken.lexeme, terminalStrings[currNode->v.t]);
+        while(currToken.token != currNode->v.t && currToken.eof == false && mainStack->size > 1){
+          if (PT->isSyn[currNode->v.non_t][currToken.token]) {
+            if (PT->table[currNode->v.non_t][currToken.token]) {
+              break;
+            }
+            else {
+              pop();
+              continue;
+            }
+          }
+          currToken = getToken(fp);
+        }
       }
     }
   }
   if (mainStack->size == 1 && currToken.eof == true) {
-    printf("Parsed the entire tree\n");
-  } else {
-    printf("Error in parsing\n");
+    printf("Parsed the entire input\n");
+  } else if (mainStack->size == 1 && currToken.eof == false) {
+    printf("Error: Parsed the entire input but stack is not empty\n");
+  } else if (mainStack->size != 1 && currToken.eof == true) {
+    printf("Line %d Error: Stack is not empty but input is parsed\n", currToken.lineCount);
   }
 }
 
@@ -1089,6 +1111,20 @@ void printFirstandFollowSets() {
     }
     printf("} count = %d\n", count);
   }
+}
+
+void printStack() {
+  printf("\n\n Printing Stack \n\n");
+  StackNode *temp = mainStack->head;
+  while (temp != NULL) {
+    if (temp->isT) {
+      printf("Terminal: %s\n", terminalStrings[temp->v.t]);
+    } else {
+      printf("Non-terminal: %s\n", nonTerminalStrings[temp->v.non_t]);
+    }
+    temp = temp->next;
+  }
+  printf("\n Stack Print over\n\n");
 }
 
 void dfsHelper(TreeNode* currTreeNode){
@@ -1206,10 +1242,39 @@ void print_parse_table() {
       if (PT->table[i][j] != NULL) {
         printProductionRule(i, PT->table[i][j]);
         printf(",");
+      } else if (PT->isSyn[i][j]) {
+        printf("SYN,");
       } else {
-        printf("-,");
+        printf("ERROR,");
       }
     }
     printf("\n");
   }
 }
+
+// void cleanUpDfs(TreeNode* currTreeNode) {
+//   if (currTreeNode == NULL) {
+//     return;
+//   }
+
+//   TreeNode* firstChild = currTreeNode->firstChild;
+//   while (firstChild) {
+//     cleanUpDfs(firstChild);
+//     firstChild = firstChild->next;
+//   }
+//   free(currTreeNode->stackNode);
+//   free(currTreeNode);
+// }
+
+// void cleanUp() {
+//   cleanUpDfs(parseTreeRoot);
+//   free(mainStack);
+//   for (int i = 0; i < nonTerminalCount; i++) {
+//     free(first_follow_sets[i].first_set);
+//     free(first_follow_sets[i].follow_set);
+//   }
+//   free(first_follow_sets);
+//   free(follow_occurrence);
+//   free(PT);
+//   free(G);
+// }

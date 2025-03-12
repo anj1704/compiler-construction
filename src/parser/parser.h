@@ -21,10 +21,19 @@ void populate_occ_follow();
 void find_followset(nonTerminals nt);
 void join_terminallist_exc_eps(terminal_list* list1, terminal_list* list2);
 void compute_follow();
+StackNode* top();
+int push(int union_val, bool isT);
+int pop();
+bool isEmpty();
+TreeNode* pushListToStack(RHSNode* currNode, StackNode* parent);
 void createParseTree(FILE *fp);
-/*void printParseTree(treeNode* node, int depth);*/
+void printParseTree();
+void dfsHelper(TreeNode* node);
+void cleanUp();
+void cleanUpDfs(TreeNode* node);
+void print_parse_table();
+void printStack();
 void printProductionRule(int nonTerminalIdx, ProductionRule* prodRule);
 void printFirstandFollowSets();
 void printAllProductionRules(int nonTerminalIdx); 
-void printParseTree();
 #endif
