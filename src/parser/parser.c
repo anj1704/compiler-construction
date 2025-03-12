@@ -927,6 +927,8 @@ TreeNode* pushListToStack(RHSNode* currNode, TreeNode* parent){
   newTreeNode->stackNode = newHead;
   newHead->treeNode = newTreeNode;
 
+  // printf("%s\n", nonTerminalStrings[newTreeNode->parent->v.non_t]);
+  // printf("%s\n", newTreeNode->isT ? terminalStrings[newTreeNode->v.t] : nonTerminalStrings[newTreeNode->v.non_t]);
   StackNode* prevStackNode = NULL;
   StackNode* currStackNode = newHead;
 
@@ -944,9 +946,18 @@ TreeNode* pushListToStack(RHSNode* currNode, TreeNode* parent){
     tempTreeNode->firstChild = NULL;
     tempTreeNode->stackNode = tempStackNode;
     tempStackNode->treeNode = tempTreeNode;
+    // printf("%s\n", nonTerminalStrings[newTreeNode->parent->v.non_t]);
+  // printf("%s\n", newTreeNode->isT ? terminalStrings[newTreeNode->v.t] : nonTerminalStrings[newTreeNode->v.non_t]);
+    // StackNode* prevStackNode = NULL;
 
-    if(prevStackNode) tempTreeNode->next = prevStackNode->treeNode;
-    else tempTreeNode->next = NULL;
+    // if(prevStackNode) tempTreeNode->next = prevStackNode->treeNode;
+    // else tempTreeNode->next = NULL;
+    if (prevStackNode) {
+      prevStackNode->treeNode->next = tempTreeNode;
+      printf("%s\n", prevStackNode->treeNode->isT ? terminalStrings[prevStackNode->treeNode->v.t] : nonTerminalStrings[prevStackNode->treeNode->v.non_t]);
+    }else{
+      newTreeNode->next = tempTreeNode;
+    }
 
     currStackNode->next = tempStackNode;
     prevStackNode = currStackNode;
@@ -989,12 +1000,15 @@ void createParseTree(FILE* fp){
   mainStack->head->treeNode = parseTreeRoot;
 
   // printf("Lexeme : %s Line count : %d\n\n", currToken.lexeme, currToken.lineCount);
-  while(!isEmpty() || currToken.eof == false){
+  while(!isEmpty() && currToken.eof == false){
     StackNode* currNode = top();
+#ifdef DEBUG
     printf("From tree : %s\n", currNode->treeNode->isT ? terminalStrings[currNode->v.t] : nonTerminalStrings[currNode->v.non_t]);
     printf("Parent of tree : %s\n", currNode->treeNode->parent ? nonTerminalStrings[currNode->treeNode->parent->v.non_t] : "ROOT");
     printf("Right sibling of node : %s\n", currNode->treeNode->next ? currNode->treeNode->next->isT ? terminalStrings[currNode->treeNode->next->v.t] : nonTerminalStrings[currNode->treeNode->next->v.non_t] : "----");
     printf("From stack : %s\n\n\n", currNode->isT ? terminalStrings[currNode->v.t] : nonTerminalStrings[currNode->v.non_t]);
+    printStack();
+#endif
     /*if(currNode->isT){*/
     /*  printf("Terminal: %s\n\n", terminalStrings[currNode->v.t]);*/
     /*}else{*/
@@ -1009,7 +1023,7 @@ void createParseTree(FILE* fp){
         terminalTreeNode->v.t = currNode->v.t;
         terminalTreeNode->token = currToken;
         terminalTreeNode->parent = currNode->treeNode;
-        terminalTreeNode->next = NULL;
+        terminalTreeNode->next = mainStack->head->treeNode;
         terminalTreeNode->firstChild = NULL;
         currNode->treeNode->firstChild = terminalTreeNode;
 
@@ -1090,17 +1104,18 @@ void dfsHelper(TreeNode* currTreeNode){
   // }
   TreeNode* firstChild = currTreeNode->firstChild;
   int count = 0;
+  TreeNode* prev = NULL;
   
-  if (firstChild) ++count;
   while(firstChild){
     count++;
     // dfsHelper(firstChild);
+    prev = firstChild;
     firstChild = firstChild->next;
   }
 
   printf("Number of kids = %d\n", count);
   firstChild = currTreeNode->firstChild;
-  for (int i = 0; i < count-1; ++i) {
+  for (int i = 1; i < count; ++i) {
     dfsHelper(firstChild);
     firstChild = firstChild->next;
   }
@@ -1117,11 +1132,28 @@ void dfsHelper(TreeNode* currTreeNode){
   }else{
     printf("\t%s\t%d\t%s\t%d\t%s\t%s\t%s\n", "----", -1, nonTerminalStrings[currTreeNode->v.non_t], -1, nonTerminalStrings[currTreeNode->parent->v.non_t],"no", nonTerminalStrings[currTreeNode->v.non_t]);
   }
-  dfsHelper(firstChild);
+  dfsHelper(prev);
+}
+
+void printTreeHelper(TreeNode* currTreeNode){
+  if(currTreeNode == NULL){
+    return ; 
+  }
+  if(currTreeNode->isT){
+    printf("Terminal: %s\n\n", terminalStrings[currTreeNode->v.t]);
+  }else{
+    printf("Non-terminal: %s\n\n", nonTerminalStrings[currTreeNode->v.non_t]);
+  }
+  TreeNode* firstChild = currTreeNode->firstChild;
+  while(firstChild){
+    printTreeHelper(firstChild);
+    firstChild = firstChild->next;
+  }
 }
 
 void printParseTree(){
   dfsHelper(parseTreeRoot);
+  // printTreeHelper(parseTreeRoot);
 }
 
 void printProductionRule(int nonTerminalIdx, ProductionRule *prodRule) {
