@@ -11,16 +11,6 @@
 
 %The following program computes the average of marks of total d5cb34567  students
 _main 
-	record #marks
-		type real : maths; 
-		type real: physics; 
-		type real: chemistry;
-	endrecord
-	% each field above represents the marks obtained in corresponding subject
-
-	type record #marks : d4;
-	% The variable d4 stores the marks of one student
-
 	type int : b5;
 	b5 <--- 1;
     return;

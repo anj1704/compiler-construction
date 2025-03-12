@@ -910,8 +910,7 @@ bool isEmpty(){
   return (mainStack->size <= 1) ? true : false;
 }
 
-
-TreeNode* pushListToStack(RHSNode* currNode, TreeNode* parent){
+TreeNode* pushListToStack(RHSNode* currNode, StackNode* parent){
 
   StackNode* newHead = (StackNode*)malloc(sizeof(StackNode));
   newHead->isT = currNode->isT;
@@ -921,14 +920,17 @@ TreeNode* pushListToStack(RHSNode* currNode, TreeNode* parent){
   TreeNode* newTreeNode = (TreeNode*)malloc(sizeof(TreeNode));
   newTreeNode->isT = currNode->isT;
   newTreeNode->v = currNode->v;
-  newTreeNode->parent = parent;
+  newTreeNode->parent = parent->treeNode;
   newTreeNode->next = NULL;
-  parent->firstChild = newTreeNode;
+  parent->treeNode->firstChild = newTreeNode;
   newTreeNode->stackNode = newHead;
   newHead->treeNode = newTreeNode;
 
-  // printf("%s\n", nonTerminalStrings[newTreeNode->parent->v.non_t]);
-  // printf("%s\n", newTreeNode->isT ? terminalStrings[newTreeNode->v.t] : nonTerminalStrings[newTreeNode->v.non_t]);
+#ifdef DEBUG
+  printf("Address of newTreeNode %s : %p\n", newTreeNode->isT ? terminalStrings[newTreeNode->v.t] : nonTerminalStrings[newTreeNode->v.non_t], newTreeNode);
+  printf("%s\n", nonTerminalStrings[newTreeNode->parent->v.non_t]);
+  printf("%s\n", newTreeNode->isT ? terminalStrings[newTreeNode->v.t] : nonTerminalStrings[newTreeNode->v.non_t]);
+#endif
   StackNode* prevStackNode = NULL;
   StackNode* currStackNode = newHead;
 
@@ -942,18 +944,22 @@ TreeNode* pushListToStack(RHSNode* currNode, TreeNode* parent){
     TreeNode* tempTreeNode = (TreeNode*)malloc(sizeof(TreeNode));
     tempTreeNode->isT = temp->isT;
     tempTreeNode->v = temp->v;
-    tempTreeNode->parent = parent;
+    tempTreeNode->parent = parent->treeNode;
     tempTreeNode->firstChild = NULL;
     tempTreeNode->stackNode = tempStackNode;
     tempStackNode->treeNode = tempTreeNode;
-    // printf("%s\n", nonTerminalStrings[newTreeNode->parent->v.non_t]);
-  // printf("%s\n", newTreeNode->isT ? terminalStrings[newTreeNode->v.t] : nonTerminalStrings[newTreeNode->v.non_t]);
-    // StackNode* prevStackNode = NULL;
+    tempTreeNode->next = NULL;
+    if (temp->isT) {
+       tempTreeNode->token = parent->treeNode->token;
+    }
 
-    // if(prevStackNode) tempTreeNode->next = prevStackNode->treeNode;
-    // else tempTreeNode->next = NULL;
+#ifdef DEBUG
+    // printf("Address of tempTreeNode %s : %p\n", tempTreeNode->isT ? terminalStrings[tempTreeNode->v.t] : nonTerminalStrings[tempTreeNode->v.non_t], tempTreeNode);
+    // printf("%s\n", nonTerminalStrings[newTreeNode->parent->v.non_t]);
+    // printf("%s\n", newTreeNode->isT ? terminalStrings[newTreeNode->v.t] : nonTerminalStrings[newTreeNode->v.non_t]);
+#endif
     if (prevStackNode) {
-      prevStackNode->treeNode->next = tempTreeNode;
+      currStackNode->treeNode->next = tempTreeNode;
       printf("%s\n", prevStackNode->treeNode->isT ? terminalStrings[prevStackNode->treeNode->v.t] : nonTerminalStrings[prevStackNode->treeNode->v.non_t]);
     }else{
       newTreeNode->next = tempTreeNode;
@@ -999,7 +1005,9 @@ void createParseTree(FILE* fp){
   parseTreeRoot->stackNode = mainStack->head;
   mainStack->head->treeNode = parseTreeRoot;
 
+#ifdef DEBUG
   // printf("Lexeme : %s Line count : %d\n\n", currToken.lexeme, currToken.lineCount);
+#endif
   while(!isEmpty() && currToken.eof == false){
     StackNode* currNode = top();
 #ifdef DEBUG
@@ -1008,25 +1016,15 @@ void createParseTree(FILE* fp){
     printf("Right sibling of node : %s\n", currNode->treeNode->next ? currNode->treeNode->next->isT ? terminalStrings[currNode->treeNode->next->v.t] : nonTerminalStrings[currNode->treeNode->next->v.non_t] : "----");
     printf("From stack : %s\n\n\n", currNode->isT ? terminalStrings[currNode->v.t] : nonTerminalStrings[currNode->v.non_t]);
     printStack();
+    if(currNode->isT){
+      printf("Terminal: %s\n\n", terminalStrings[currNode->v.t]);
+    }else{
+      printf("Non-terminal: %s\n\n", nonTerminalStrings[currNode->v.non_t]);
+    }
 #endif
-    /*if(currNode->isT){*/
-    /*  printf("Terminal: %s\n\n", terminalStrings[currNode->v.t]);*/
-    /*}else{*/
-    /*  printf("Non-terminal: %s\n\n", nonTerminalStrings[currNode->v.non_t]);*/
-    /*}*/
     if(currNode->isT){
       if(currToken.token == currNode->v.t){
         pop();
-
-        TreeNode *terminalTreeNode = (TreeNode*)malloc(sizeof(TreeNode));
-        terminalTreeNode->isT = true;
-        terminalTreeNode->v.t = currNode->v.t;
-        terminalTreeNode->token = currToken;
-        terminalTreeNode->parent = currNode->treeNode;
-        terminalTreeNode->next = mainStack->head->treeNode;
-        terminalTreeNode->firstChild = NULL;
-        currNode->treeNode->firstChild = terminalTreeNode;
-
         currToken = getToken(fp);
       }else{
         printf("Throws error\n");
@@ -1047,7 +1045,7 @@ void createParseTree(FILE* fp){
           continue;
         }
         else{
-          TreeNode* firstChild = pushListToStack(temp, currNode->treeNode);
+          TreeNode* firstChild = pushListToStack(temp, currNode);
           currNode->treeNode->firstChild = firstChild;
         }
       }else{
@@ -1097,23 +1095,16 @@ void dfsHelper(TreeNode* currTreeNode){
   if(currTreeNode == NULL){
     return ; 
   }
-  // if(currTreeNode->isT){
-  //   printf("Terminal: %s\n\n", terminalStrings[currTreeNode->v.t]);
-  // }else{
-  //   printf("Non-terminal: %s\n\n", nonTerminalStrings[currTreeNode->v.non_t]);
-  // }
   TreeNode* firstChild = currTreeNode->firstChild;
   int count = 0;
   TreeNode* prev = NULL;
   
   while(firstChild){
     count++;
-    // dfsHelper(firstChild);
     prev = firstChild;
     firstChild = firstChild->next;
   }
 
-  printf("Number of kids = %d\n", count);
   firstChild = currTreeNode->firstChild;
   for (int i = 1; i < count; ++i) {
     dfsHelper(firstChild);
@@ -1201,162 +1192,3 @@ void print_parse_table() {
     printf("\n");
   }
 }
-
-// void print_parse_table() {
-//   /*printf("Parse Table:\n");*/
-//   printf("Non-terminals/Terminals,");
-//   for (int j = 0; j < terminalCount; j++) {
-//     printf("%s,", terminalStrings[j]);
-//   }
-//   printf("\n");
-
-//   for (int i = 0; i < nonTerminalCount; i++) {
-//     printf("%s,", nonTerminalStrings[i]);
-//     for (int j = 0; j < terminalCount; j++) {
-//       if (PT->table[i][j] != NULL) {
-//         if (PT->table[i][j]->head->isT) {
-//           // printf("%s,", terminalStrings[PT->table[i][j]->head->v.t]);
-//           printProductionRule(i, PT->table[i][j]);
-//         } else {
-//           // printf("%s,",
-//           nonTerminalStrings[PT->table[i][j]->head->v.non_t]);
-//         }
-//       } else {
-//         printf("NULL,");
-//       }
-//     }
-//     printf("\n");
-//   }
-// }
-/*bool createParseTree(FILE *fp) {*/
-/*  StackNode *startNode = (StackNode *)malloc(sizeof(StackNode));*/
-/*  if (startNode == NULL) {*/
-/*    fprintf(stderr, "Memory allocation failed for StackNode.\n");*/
-/*    exit(EXIT_FAILURE);*/
-/*  }*/
-/*  startNode->isT = true;*/
-/*  startNode->value.t = END_OF_INPUT;*/
-/*  startNode->next = NULL;*/
-/*  StackNode *parsingStack = startNode;*/
-/**/
-/*  StackNode *programNode = (StackNode *)malloc(sizeof(StackNode));*/
-/*  if (programNode == NULL) {*/
-/*    fprintf(stderr, "Memory allocation failed for StackNode\n");*/
-/*    exit(EXIT_FAILURE);*/
-/*  }*/
-/*  programNode->isT = false;*/
-/*  programNode->value.non_t = program;*/
-/*  programNode->next = parsingStack;*/
-/*  parsingStack = programNode;*/
-/**/
-/*  root = (treeNode *)malloc(sizeof(treeNode));*/
-/*  if (root == NULL) {*/
-/*    fprintf(stderr, "Memory allocation failed for root node.\n");*/
-/*    exit(EXIT_FAILURE);*/
-/*  }*/
-/*  root->parent = NULL;*/
-/*  root->firstChild = NULL;*/
-/*  root->rightSibling = NULL;*/
-/*  root->isT = false;*/
-/*  root->v.non_t = program;*/
-/*  treeNode *currentParent = root;*/
-/*  SymTableItem currentToken = getToken(fp);*/
-/**/
-/*  while (parsingStack != NULL) {*/
-/*    StackNode *top = parsingStack;*/
-/*    parsingStack = parsingStack->next;*/
-/**/
-/*    if (top->isT && top->value.t == END_OF_INPUT) {*/
-/*      break;*/
-/*    }*/
-/*    if (!top->isT) {*/
-/*      printf("non Terminal: %s\n", nonTerminalStrings[top->value.non_t]);*/
-/*      ProductionRule *productionRule =*/
-/*          PT->table[top->value.non_t][currentToken.token];*/
-/*      if (productionRule == NULL) {*/
-/*        continue;*/
-/*        fprintf(stderr,*/
-/*                "Error: No production rule found for non-terminal '%s' and "*/
-/*                "token '%s' at line %d\n",*/
-/*                nonTerminalStrings[top->value.non_t],*/
-/*                terminalStrings[currentToken.token], currentToken.lineCount);*/
-/*        return false;*/
-/*      }*/
-/**/
-/*      RHSNode *currentRHS = productionRule->head;*/
-/*      while (currentRHS != NULL) {*/
-/*        StackNode *rhsNode = (StackNode *)malloc(sizeof(StackNode));*/
-/*        if (rhsNode == NULL) {*/
-/*          fprintf(stderr, "Memory allocation failed for StackNode.\n");*/
-/*          exit(EXIT_FAILURE);*/
-/*        }*/
-/*        rhsNode->isT = currentRHS->isT;*/
-/*        rhsNode->value = currentRHS->v;*/
-/*        rhsNode->next = parsingStack;*/
-/*        parsingStack = rhsNode;*/
-/*        currentRHS = currentRHS->next;*/
-/*      }*/
-/*    } else {*/
-/*      printf("Terminal: %s\n", terminalStrings[top->value.t]);*/
-/*      if (top->value.t != currentToken.token) {*/
-/*        fprintf(stderr, "Error: Unexpected token at '%s' at line %d\n",*/
-/*                terminalStrings[currentToken.token], currentToken.lineCount);*/
-/*        return false;*/
-/*      }*/
-/**/
-/*      treeNode *newNode = (treeNode *)malloc(sizeof(treeNode));*/
-/*      if (newNode == NULL) {*/
-/*        fprintf(stderr, "Memory allocation failed for tree node.\n");*/
-/*        exit(EXIT_FAILURE);*/
-/*      }*/
-/*      newNode->parent = currentParent;*/
-/*      newNode->firstChild = NULL;*/
-/*      newNode->rightSibling = NULL;*/
-/*      newNode->isT = true;*/
-/*      newNode->v.t = currentToken.token;*/
-/*      if (currentParent->firstChild == NULL) {*/
-/*        currentParent->firstChild = newNode;*/
-/*      } else {*/
-/*        treeNode *sibling = currentParent->firstChild;*/
-/*        while (sibling->rightSibling != NULL) {*/
-/*          sibling = sibling->rightSibling;*/
-/*        }*/
-/*        sibling->rightSibling = newNode;*/
-/*      }*/
-/*    }*/
-/*    currentToken = getToken(fp);*/
-/*  }*/
-/*  if (parsingStack == NULL) {*/
-/*    printf("Parsing Successful.\n");*/
-/*    return true;*/
-/*  } else {*/
-/*    fprintf(stderr, "Error: Unexpected end of input\n");*/
-/*    return false;*/
-/*  }*/
-/*}*/
-/**/
-/*void printParseTree(treeNode *node, int depth) {*/
-/*  if (node == NULL) {*/
-/*    return;*/
-/*  }*/
-/*  // Print current node*/
-/*  printParseTree(node->firstChild, depth + 1);*/
-/*  for (int i = 0; i < depth; i++) {*/
-/*    printf("  "); // Indent according to depth*/
-/*  }*/
-/**/
-/*  if (node->isT) {*/
-/*    printf("Terminal: %s\n",*/
-/*           terminalStrings[node->v.t]); // define function getTokenName This*/
-/*                                        // function takes a token type*/
-/*                                        // (enumeration value) as input and*/
-/*                                        // returns a string representing the*/
-/*                                        // name or description of that token*/
-/*  } else {*/
-/*    printf("Non-terminal: %s\n", nonTerminalStrings[node->v.non_t]);*/
-/*  }*/
-/**/
-/*  // Print children recursively*/
-/*  printParseTree(node->rightSibling,*/
-/*                 depth); // Print right sibling at same depth*/
-/*}*/
