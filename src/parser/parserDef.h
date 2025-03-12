@@ -40,6 +40,7 @@ typedef struct treeNode{
   struct StackNode* stackNode;
   bool isT;
   value v;
+  SymTableItem token;
 } TreeNode;
 
 typedef struct rhs_node {

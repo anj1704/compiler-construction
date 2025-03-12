@@ -66,8 +66,9 @@ int main() {
   initiate_parse_table();
   // print_parse_table();
   //printFirstandFollowSets();
-  char *sourceFile = "/home/sundar/Desktop/compiler-construction/Parser Test Cases/t3.txt";
-  char *cleanFile = "/home/sundar/Desktop/compiler-construction/Parser Test Cases/output_3.txt";
+  // assuming we are running with makefile in the compiler-construction directory
+  char *sourceFile = "./Parser Test Cases/t8.txt";
+  char *cleanFile = "./Parser Test Cases/cleaned.txt";
   removeComments(sourceFile, cleanFile);
 
   FILE *fp = initialise(cleanFile, BUFFER_SIZE);
