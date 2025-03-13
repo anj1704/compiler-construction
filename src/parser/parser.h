@@ -25,7 +25,7 @@ StackNode* top();
 int push(int union_val, bool isT);
 int pop();
 bool isEmpty();
-TreeNode* pushListToStack(RHSNode* currNode, StackNode* parent);
+TreeNode* pushListToStack(RHSNode* currNode, StackNode* parent, SymTableItem currToken);
 void createParseTree(FILE *fp);
 void printParseTree();
 void dfsHelper(TreeNode* node);

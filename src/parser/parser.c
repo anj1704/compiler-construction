@@ -920,7 +920,7 @@ bool isEmpty(){
   return (mainStack->size <= 1) ? true : false;
 }
 
-TreeNode* pushListToStack(RHSNode* currNode, StackNode* parent){
+TreeNode* pushListToStack(RHSNode* currNode, StackNode* parent, SymTableItem currToken){
 
   StackNode* newHead = (StackNode*)malloc(sizeof(StackNode));
   newHead->isT = currNode->isT;
@@ -960,7 +960,8 @@ TreeNode* pushListToStack(RHSNode* currNode, StackNode* parent){
     tempStackNode->treeNode = tempTreeNode;
     tempTreeNode->next = NULL;
     if (temp->isT) {
-       tempTreeNode->token = parent->treeNode->token;
+       tempTreeNode->token = currToken;
+       printf("Lexeme is: %s\n", tempTreeNode->token.lexeme);
     }
 
 #ifdef DEBUG
@@ -1008,18 +1009,18 @@ void createParseTree(FILE* fp){
 #endif
   while(!isEmpty() && currToken.eof == false){
     StackNode* currNode = top();
-#ifdef DEBUG
-    printf("From tree : %s\n", currNode->treeNode->isT ? terminalStrings[currNode->v.t] : nonTerminalStrings[currNode->v.non_t]);
-    printf("Parent of tree : %s\n", currNode->treeNode->parent ? nonTerminalStrings[currNode->treeNode->parent->v.non_t] : "ROOT");
-    printf("Right sibling of node : %s\n", currNode->treeNode->next ? currNode->treeNode->next->isT ? terminalStrings[currNode->treeNode->next->v.t] : nonTerminalStrings[currNode->treeNode->next->v.non_t] : "----");
-    printf("From stack : %s\n\n\n", currNode->isT ? terminalStrings[currNode->v.t] : nonTerminalStrings[currNode->v.non_t]);
-    printStack();
-    if(currNode->isT){
-      printf("Terminal: %s\n\n", terminalStrings[currNode->v.t]);
-    }else{
-      printf("Non-terminal: %s\n\n", nonTerminalStrings[currNode->v.non_t]);
-    }
-#endif
+/*#ifdef DEBUG*/
+/*    printf("From tree : %s\n", currNode->treeNode->isT ? terminalStrings[currNode->v.t] : nonTerminalStrings[currNode->v.non_t]);*/
+/*    printf("Parent of tree : %s\n", currNode->treeNode->parent ? nonTerminalStrings[currNode->treeNode->parent->v.non_t] : "ROOT");*/
+/*    printf("Right sibling of node : %s\n", currNode->treeNode->next ? currNode->treeNode->next->isT ? terminalStrings[currNode->treeNode->next->v.t] : nonTerminalStrings[currNode->treeNode->next->v.non_t] : "----");*/
+/*    printf("From stack : %s\n\n\n", currNode->isT ? terminalStrings[currNode->v.t] : nonTerminalStrings[currNode->v.non_t]);*/
+/*    printStack();*/
+/*    if(currNode->isT){*/
+/*      printf("Terminal: %s\n\n", terminalStrings[currNode->v.t]);*/
+/*    }else{*/
+/*      printf("Non-terminal: %s\n\n", nonTerminalStrings[currNode->v.non_t]);*/
+/*    }*/
+/*#endif*/
     if(currNode->isT){
       if(currToken.token == currNode->v.t){
         pop();
@@ -1053,7 +1054,7 @@ void createParseTree(FILE* fp){
           continue;
         }
         else{
-          TreeNode* firstChild = pushListToStack(temp, currNode);
+          TreeNode* firstChild = pushListToStack(temp, currNode, currToken);
           currNode->treeNode->firstChild = firstChild;
         }
       }else{
@@ -1137,6 +1138,7 @@ void dfsHelper(TreeNode* currTreeNode){
   
   dfsHelper(firstChild);
   if(currTreeNode->isT){
+    printf("HIIIII: %s \n", currTreeNode->token.lexeme);
     if (currTreeNode->token.token == TK_NUM) {
       printf("|%-25s|%-25d|%-25s|%-25d|%-25s|%-25s|%-25s|\n", currTreeNode->token.lexeme, currTreeNode->token.lineCount, terminalStrings[currTreeNode->v.t], currTreeNode->token.intVal, nonTerminalStrings[currTreeNode->parent->v.non_t], "YES", "----");
     } 
