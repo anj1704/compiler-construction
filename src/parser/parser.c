@@ -1163,8 +1163,8 @@ void dfsHelper(TreeNode* currTreeNode){
   printf("|\n");
   
   while(firstChild){
-    dfsHelper(firstChild);
     firstChild = firstChild->next;
+    dfsHelper(firstChild);
   }
 }
 
