@@ -1,5 +1,6 @@
 #include "lexer/lexer.h"
 #include "parser/parser.h"
+#include <time.h>
 char* terminalStrings[] = {
     "TK_PLUS", "TK_MINUS", "TK_MUL", "TK_DIV",
     "TK_GT", "TK_LT", "TK_EQ", "TK_NE", "TK_LE", "TK_GE",
@@ -52,6 +53,7 @@ Stack* mainStack;
 TreeNode* parseTreeRoot;
 
 int main() {
+  clock_t start, end;
   G = (Grammar *)malloc(sizeof(Grammar));
   mainStack = (Stack*)malloc(sizeof(Stack));
   parseTreeRoot = (TreeNode*)malloc(sizeof(TreeNode));
@@ -66,7 +68,7 @@ int main() {
   initiate_parse_table();
   // print_parse_table();
   //printFirstandFollowSets();
-  char *sourceFile = "./Parser Test Cases/t6.txt";
+  char *sourceFile = "./Parser Test Cases/t8.txt";
   char *cleanFile = "./Parser Test Cases/cleaned.txt";
   removeComments(sourceFile, cleanFile);
   
@@ -77,8 +79,17 @@ int main() {
   }
   printf("initialised file\n");
 
+  double totalCPUTime, totalCPUTimeInSeconds;
+  start = clock();
   createParseTree(fp);
+  end = clock();
   printParseTree();
+
+  totalCPUTime = (double)(end - start);
+  totalCPUTimeInSeconds = totalCPUTime / CLOCKS_PER_SEC;
+  printf("Total CPU time taken: %f\n", totalCPUTime);
+  printf("Total CPU time in seconds: %f\n", totalCPUTimeInSeconds);
+  fclose(fp);
 
   // cleanUp();
   // printAllProductionRules(moreExpansions);

@@ -1027,13 +1027,12 @@ void createParseTree(FILE* fp){
       }else{
         printf("Line %d Error: The token %s for lexeme %s does not match expected token %s\n", currToken.lineCount, terminalStrings[currToken.token], currToken.lexeme, terminalStrings[currNode->v.t]);
         while(currToken.token != currNode->v.t && currToken.eof == false && mainStack->size > 1){
-          if (PT->isSyn[currNode->v.non_t][currToken.token]) {
-            if (PT->table[currNode->v.non_t][currToken.token]) {
-              break;
-            }
-            else {
+          if (currNode->isT && PT->isSyn[currNode->v.non_t][currToken.token]) {
+            if (!PT->table[currNode->v.non_t][currToken.token]) {
               pop();
+              continue;
             }
+            break;
           }
           currToken = getToken(fp);
         }
@@ -1080,6 +1079,9 @@ void createParseTree(FILE* fp){
     printf("Error: Parsed the entire input but stack is not empty\n");
   } else if (mainStack->size != 1 && currToken.eof == true) {
     printf("Line %d Error: Stack is not empty but input is parsed\n", currToken.lineCount);
+    while (mainStack->size > 1) {
+      pop();
+    }
   }
 }
 
@@ -1132,20 +1134,8 @@ void dfsHelper(TreeNode* currTreeNode){
     return ; 
   }
   TreeNode* firstChild = currTreeNode->firstChild;
-  int count = 0;
-  TreeNode* prev = NULL;
   
-  while(firstChild){
-    count++;
-    prev = firstChild;
-    firstChild = firstChild->next;
-  }
-
-  firstChild = currTreeNode->firstChild;
-  for (int i = 1; i < count; ++i) {
-    dfsHelper(firstChild);
-    firstChild = firstChild->next;
-  }
+  dfsHelper(firstChild);
   if(currTreeNode->isT){
     if (currTreeNode->token.token == TK_NUM) {
       printf("|%-25s|%-25d|%-25s|%-25d|%-25s|%-25s|%-25s|\n", currTreeNode->token.lexeme, currTreeNode->token.lineCount, terminalStrings[currTreeNode->v.t], currTreeNode->token.intVal, nonTerminalStrings[currTreeNode->parent->v.non_t], "YES", "----");
@@ -1169,7 +1159,11 @@ void dfsHelper(TreeNode* currTreeNode){
     printf("-");
   }
   printf("|\n");
-  dfsHelper(prev);
+  
+  while(firstChild){
+    dfsHelper(firstChild);
+    firstChild = firstChild->next;
+  }
 }
 
 void printTreeHelper(TreeNode* currTreeNode){
