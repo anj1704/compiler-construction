@@ -11,7 +11,7 @@ void initializeKeywords();
 SymTableItem error_helper(int error, char *lex, int line);
 char *getLexeme();
 FILE *getstream(FILE *fp);
-void removeComments(char *testFile, char *cleanFile);
+void removeComments(char *testFile);
 char getNextCharacter(FILE *fp);
 terminals findKeyword(char *lexeme);
 SymTableItem tokenize(char *lex, terminals g, int line);

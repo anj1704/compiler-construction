@@ -18,28 +18,21 @@ extern int lineCount;
 extern bool isEOF;
 extern twinBuffer tBuff;
 
-void removeComments(char *testcaseFile, char *cleanFile) {
-  FILE *testcaseFp = fopen(testcaseFile, "r");
-  FILE *cleanFp = fopen(cleanFile, "w");
+void removeComments(char *testCaseFile) {
+  FILE *testCaseFp = fopen(testCaseFile, "r");
 
-  if (!testcaseFp) {
-    printf("Opening testcase file failed\n");
-    return;
-  }
-
-  if (!cleanFp) {
-    printf("Opening clean file failed\n");
+  if (!testCaseFp) {
+    printf("Opening testCase file failed\n");
     return;
   }
 
   char *line = malloc(200 * sizeof(char));
   bool isComment = false;
 
-  while (fgets(line, 200, testcaseFp)) {
+  while (fgets(line, 200, testCaseFp)) {
     if (!line) {
       break;
     }
-
     isComment = false;
     for (int i = 0; line[i] != '\n'; ++i) {
       if (line[i] == ' ' || line[i] == '\t') {
@@ -54,12 +47,11 @@ void removeComments(char *testcaseFile, char *cleanFile) {
     }
 
     if (!isComment) {
-      fputs(line, cleanFp);
+      printf("%s", line);
     }
   }
 
-  fclose(testcaseFp);
-  fclose(cleanFp);
+  fclose(testCaseFp);
 }
 
 // initialising lexer
@@ -82,8 +74,10 @@ FILE *initialise(char *inputFile, long long int buff_size) {
   startPtr = tBuff.bufferOne;
   endPtr = tBuff.bufferOne;
   initializeSymbolTable();
+
   return fileptr;
 }
+
 void initializeKeywords() {
   keyword key[] = {
       {"_main", TK_MAIN},

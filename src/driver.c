@@ -52,7 +52,16 @@ gitems **itemList;
 Stack* mainStack;
 TreeNode* parseTreeRoot;
 
-int main() {
+void Usage() {
+  fprintf(stderr, "Usage: ./compiler <source_file> <output_file>\n");
+}
+
+int main(int argc, char *argv[]) {
+  if (argc != 3) {
+    Usage();
+    return 1;
+  }
+
   clock_t start, end;
   G = (Grammar *)malloc(sizeof(Grammar));
   mainStack = (Stack*)malloc(sizeof(Stack));
@@ -60,42 +69,98 @@ int main() {
   addGrammarRules();
   printf("Grammar rules added\n");
   compute_firsts();
-  printf("Computed firsts\n");
+  printf("Computed first sets\n");
   compute_follow();
   printf("Computed follow\n");
   create_parse_table();
-  printf("Created parse table\n");
   initiate_parse_table();
-  // print_parse_table();
-  //printFirstandFollowSets();
-  char *sourceFile = "./Parser Test Cases/t6.txt";
-  char *cleanFile = "./Parser Test Cases/cleaned.txt";
-  removeComments(sourceFile, cleanFile);
-  
+  printf("Created and filled parse table\n");
+
+  char *sourceFile = argv[1];
+  char *outputFile = argv[2];
+
   FILE *fp = initialise(sourceFile, BUFFER_SIZE);
-  if (!fp) {
+  if (!fp)
+  {
     fprintf(stderr, "Failed to initialize lexer with file: %s\n", sourceFile);
     return 1;
   }
-  printf("initialised file\n");
+  FILE *output = fopen(outputFile, "w");
+  if (!output)
+  {
+    fprintf(stderr, "Failed to open output file: %s\n", outputFile);
+    return 1;
+  }
+  printf("File, buffers and symbol table initialized\n");
+  printf("\n***Lexical and syntax analysis modules implemented, all testcases functional***\n");
+  int option;
 
-  double totalCPUTime, totalCPUTimeInSeconds;
-  start = clock();
-  createParseTree(fp);
-  end = clock();
-  printParseTree();
+  while (1) {
+    for (int i = 0; i < 200; i++) {
+      printf("=");
+    }
+    printf("\n");
+    printf("Choose an option:\n");
+    printf("0. Exit\n");
+    printf("1. Print comment free code on console\n");
+    printf("2. Print tokens on console\n");
+    printf("3. Perform parsing and print parse tree to file.\n");
+    printf("4. Print the time taken to perform parsing\n");
+    scanf("%d", &option);
+    for (int i = 0; i < 200; i++) {
+      printf("=");
+    }
+    printf("\n");
 
-  totalCPUTime = (double)(end - start);
-  totalCPUTimeInSeconds = totalCPUTime / CLOCKS_PER_SEC;
-  printf("Total CPU time taken: %f\n", totalCPUTime);
-  printf("Total CPU time in seconds: %f\n", totalCPUTimeInSeconds);
+    if (option == 0) break;
+    else if (option == 1) {
+      removeComments(sourceFile);
+    }
+    else if (option == 2) {
+      SymTableItem currToken;
+      lineCount = 1;
+      printf("*");
+      for (int i = 0; i < 77; i++) {
+        printf("-");
+      }
+      printf("*\n");
+      printf("|%-25s|%-25s|%-25s|\n", "Line Number", "Token", "Lexeme");
+      printf("*");
+      for (int i = 0; i < 77; i++) {
+        printf("-");
+      }
+      printf("*\n");
+      while (1) {
+        currToken = getToken(fp);
+        currToken.lineCount = lineCount;
+        if (currToken.eof) {
+          break;
+        }
+        printf("|%-25d|%-25s|%-25s|\n", currToken.lineCount, terminalStrings[currToken.token], currToken.lexeme);
+        for (int i = 0; i < 79; i++) {
+          printf("-");
+        }
+        printf("\n");
+      }
+    }
+    else if (option == 3) {
+      lineCount = 1;
+      createParseTree(fp);
+      printParseTree(output);
+    }
+    else if (option == 4) {
+      lineCount = 1;
+      start = clock();
+      createParseTree(fp);
+      end = clock();
+      double totalCPUTime = (double)(end - start);
+      double totalCPUTimeInSeconds = totalCPUTime / CLOCKS_PER_SEC;
+      printf("Total CPU time taken: %f\n", totalCPUTime);
+      printf("Total CPU time in seconds: %f\n", totalCPUTimeInSeconds);
+    }
+  }
+
   fclose(fp);
-
-  // cleanUp();
-  // printAllProductionRules(moreExpansions);
-  // printf("\n");
-  // printAllProductionRules(option_single_constructed);
-  // printf("\n");
-
+  fclose(output);
   return 0;
 }
