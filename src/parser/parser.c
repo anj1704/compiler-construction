@@ -1013,7 +1013,6 @@ void createParseTree(FILE* fp){
       // LEXER ERROR DETECTED
       currToken = getToken(fp);
       currToken.lineCount = lineCount;
-      pop();
       continue;
     }
     if(currNode->isT){
@@ -1030,6 +1029,7 @@ void createParseTree(FILE* fp){
         pop();
       }
     }else{
+      // STACK TOP IS A NON-TERMINAL
       ProductionRule* pr = PT->table[currNode->v.non_t][currToken.token];
       if(pr){
         pop();
@@ -1050,22 +1050,14 @@ void createParseTree(FILE* fp){
         }
       }else{
         // ENTRY IN PARSE TABLE NOT FOUND
-        printf("Line %d Error: Invalid token %s encountered with value %s stack top %s\n", currToken.lineCount, terminalStrings[currToken.token], currToken.lexeme, terminalStrings[currNode->v.t]);
+        printf("Line %d Error: Invalid token %s encountered with value %s stack top %s\n", currToken.lineCount, terminalStrings[currToken.token], currToken.lexeme, nonTerminalStrings[currNode->v.non_t]);
         if(currToken.eof == false && mainStack->size > 1){
-          /*if(!currNode->isT && PT->table[currNode->v.non_t][currToken.token]){*/
-          /*  break;*/
-          /*}*/
           if (!currNode->isT && PT->isSyn[currNode->v.non_t][currToken.token]) {
               pop();
               continue;
           }
           currToken = getToken(fp);
           currToken.lineCount = lineCount;
-          /*if(currToken.token == TK_COMMENT || currToken.token == TK_ERROR){*/
-          /*  currToken = getToken(fp);*/
-          /*  currToken.lineCount = lineCount;*/
-          /*  printf("Lexeme : %s\n", currToken.lexeme);*/
-          /*}*/
         }
       }
     }

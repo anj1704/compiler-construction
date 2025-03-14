@@ -37,7 +37,7 @@ keyword* keywords[keywordCount];
 FILE *fp;
 char *endPtr, *startPtr;
 bool buffOneFlag, buffTwoFlag;
-int lineCount = 0;
+int lineCount = 1;
 bool isEOF;
 bool loadBufferOne = true;
 bool loadBufferTwo = true;
