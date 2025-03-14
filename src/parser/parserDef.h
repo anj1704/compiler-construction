@@ -38,6 +38,7 @@ typedef struct treeNode{
   struct treeNode *firstChild;
   struct treeNode* next;
   struct StackNode* stackNode;
+  SymTableItem* SymTableItem;
   bool isT;
   value v;
   SymTableItem token;

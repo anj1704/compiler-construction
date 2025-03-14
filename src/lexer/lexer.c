@@ -349,38 +349,41 @@ terminals findKeyword(char *lexeme) {
 
 // tokenize
 SymTableItem tokenize(char *lex, terminals g, int line) {
-  SymTableItem nextSymbolItem;
-  nextSymbolItem.eof = false;
-  nextSymbolItem.lexeme = lex;
-  nextSymbolItem.lineCount = line;
-  nextSymbolItem.token = g;
-  nextSymbolItem.intVal = 0;
-  nextSymbolItem.realVal = 0.0;
+  /*SymTableItem nextSymbolItem;*/
+  /*nextSymbolItem.eof = false;*/
+  /*nextSymbolItem.lexeme = lex;*/
+  /*nextSymbolItem.lineCount = line;*/
+  /*nextSymbolItem.token = g;*/
+  /*nextSymbolItem.intVal = 0;*/
+  /*nextSymbolItem.realVal = 0.0;*/
+  insert(lex, g);
+  SymTableItem* nextSymbolItem = lookup(lex);
   switch (g) {
   case TK_NUM:
-    nextSymbolItem.intVal = atoi(lex);
+    /*printf("%s\n", nextSymbolItem->lexeme);*/
+    nextSymbolItem->intVal = atoi(lex);
     break;
   case TK_RNUM:
-    nextSymbolItem.realVal = atof(lex);
+    nextSymbolItem->realVal = atof(lex);
     break;
   case TK_FIELDID:
-    nextSymbolItem.token = findKeyword(nextSymbolItem.lexeme);
-    if (nextSymbolItem.token == -1) {
-      nextSymbolItem.token = TK_FIELDID;
+    nextSymbolItem->token = findKeyword(nextSymbolItem->lexeme);
+    if (nextSymbolItem->token == -1) {
+      nextSymbolItem->token = TK_FIELDID;
     }
   case TK_ID:
-    if (strlen(nextSymbolItem.lexeme) > 20) {
+    if (strlen(nextSymbolItem->lexeme) > 20) {
       return error_helper(-3, lex, line);
     }
     break;
   case TK_FUNID:
-    if (strlen(nextSymbolItem.lexeme) > 30) {
+    if (strlen(nextSymbolItem->lexeme) > 30) {
       return error_helper(-4, lex, line);
     }
     break;
   }
   startPtr = endPtr;
-  return nextSymbolItem;
+  return *nextSymbolItem;
 }
 SymTableItem getToken(FILE *fp) {
   startPtr = endPtr;

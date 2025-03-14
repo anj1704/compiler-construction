@@ -68,7 +68,7 @@ int main() {
   initiate_parse_table();
   // print_parse_table();
   //printFirstandFollowSets();
-  char *sourceFile = "./Parser Test Cases/t8.txt";
+  char *sourceFile = "./Parser Test Cases/t4.txt";
   char *cleanFile = "./Parser Test Cases/cleaned.txt";
   removeComments(sourceFile, cleanFile);
   
@@ -99,36 +99,3 @@ int main() {
 
   return 0;
 }
-
-// int main(void) {
-//   char *sourceFile = "./Parser Test Cases/t3.txt";
-//   char *cleanFile = "./Parser Test Cases/cleaned.txt";
-
-//   removeComments(sourceFile, cleanFile);
-
-//   FILE *fp = initialise(cleanFile, BUFFER_SIZE);
-//   if (!fp) {
-//     fprintf(stderr, "Failed to initialize lexer with file: %s\n", cleanFile);
-//     return 1;
-//   }
-
-//   SymTableItem currToken;
-//   int tokenCount = 0;
-//   lineCount = 1;
-
-//   while (!isEOF) {
-//     currToken = getToken(fp);
-
-//     if (currToken.lexeme != NULL) {
-//       printf("LineNo: %d , Token: %s, Lexeme: %s\n", currToken.lineCount,
-//              terminalStrings[currToken.token], currToken.lexeme);
-//       tokenCount++;
-//     }
-//   }
-
-//   printf("Total number of tokens: %d\n", tokenCount);
-
-//   fclose(fp);
-
-//   return 0;
-// }
