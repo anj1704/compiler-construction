@@ -12,6 +12,7 @@ extern ParseTable *PT;
 extern gitems **itemList;
 extern Stack* mainStack;
 extern TreeNode* parseTreeRoot;
+extern int lineCount;
 
 gitems *createNonTerminal(nonTerminals nt) {
   gitems *item = (gitems *)malloc(sizeof(gitems));
@@ -990,6 +991,7 @@ void createParseTree(FILE* fp){
   push(program, 0);
 
   SymTableItem currToken = getToken(fp);
+  currToken.lineCount = lineCount;
 
   parseTreeRoot->parent = NULL;
   parseTreeRoot->firstChild = NULL;
@@ -1019,6 +1021,7 @@ void createParseTree(FILE* fp){
 #endif
     if(currNode->isT){
       if(currToken.token == currNode->v.t){
+        currToken.lineCount = lineCount;
         currNode->treeNode->token = currToken;
         pop();
         currToken = getToken(fp);
