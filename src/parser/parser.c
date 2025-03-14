@@ -1003,7 +1003,7 @@ void createParseTree(FILE* fp){
 
   while(!isEmpty() && currToken.eof == false){
     StackNode* currNode = top();
-    printf("Token is: %s\n", terminalStrings[currToken.token]);
+    /*printf("Token is: %s\n", terminalStrings[currToken.token]);*/
     if(currToken.token == TK_COMMENT){
       // CURRENT TOKEN IS A COMMENT
       currToken = getToken(fp);

@@ -384,7 +384,7 @@ SymTableItem getToken(FILE *fp) {
   char ch = getNextCharacter(fp);
   int dfastate = 1;
   SymTableItem newSymbolItem;
-  char *lexeme;
+  char *lexeme = "";
 
   while (dfastate >= 1) {
 #ifdef DEBUG
@@ -984,6 +984,7 @@ SymTableItem getToken(FILE *fp) {
   }
 
   if (dfastate < 0) {
+    lexeme = getLexeme();
     return error_helper(dfastate, lexeme, lineCount);
   }
 
