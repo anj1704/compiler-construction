@@ -219,11 +219,12 @@ SymTableItem *lookup(char *lexeme) {
 // error handling
 SymTableItem error_helper(int error, char *lex, int line) {
   SymTableItem nextSymbolItem;
-  nextSymbolItem.token = 0;
+  nextSymbolItem.token = TK_ERROR;
   nextSymbolItem.lexeme = NULL;
   nextSymbolItem.intVal = 0;
   nextSymbolItem.realVal = 0.00;
   nextSymbolItem.lineCount = line;
+  nextSymbolItem.eof = 0;
   if (error == -2)
     printf("Line %d Error: Unknown character <%s> \n\n", line, lex);
   else if (error == -3)

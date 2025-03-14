@@ -13,7 +13,7 @@ char* terminalStrings[] = {
     "TK_MAIN", "TK_PARAMETERS", "TK_PARAMETER", "TK_GLOBAL", "TK_RETURN", "TK_CALL", "TK_INPUT", "TK_OUTPUT",
     "TK_READ", "TK_WRITE",
     "TK_DEFINETYPE", "TK_WITH", "TK_AS", "TK_END", "TK_ENDRECORD", "TK_ENDUNION",
-    "TK_COMMENT", "EPS", "END_OF_INPUT"
+    "TK_COMMENT", "EPS", "END_OF_INPUT", "TK_ERROR"
 };
 
 char* nonTerminalStrings[] = {
@@ -37,7 +37,7 @@ keyword* keywords[keywordCount];
 FILE *fp;
 char *endPtr, *startPtr;
 bool buffOneFlag, buffTwoFlag;
-int lineCount = 1;
+int lineCount = 0;
 bool isEOF;
 bool loadBufferOne = true;
 bool loadBufferTwo = true;
@@ -68,7 +68,7 @@ int main() {
   initiate_parse_table();
   // print_parse_table();
   //printFirstandFollowSets();
-  char *sourceFile = "./Parser Test Cases/t4.txt";
+  char *sourceFile = "./Parser Test Cases/t6.txt";
   char *cleanFile = "./Parser Test Cases/cleaned.txt";
   removeComments(sourceFile, cleanFile);
   

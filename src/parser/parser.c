@@ -991,10 +991,6 @@ void createParseTree(FILE* fp){
   push(program, 0);
 
   SymTableItem currToken = getToken(fp);
-  while(currToken.token == TK_COMMENT){
-    currToken = getToken(fp);
-    currToken.lineCount = lineCount;
-  }
 
   parseTreeRoot->parent = NULL;
   parseTreeRoot->firstChild = NULL;
@@ -1005,41 +1001,33 @@ void createParseTree(FILE* fp){
   parseTreeRoot->stackNode = mainStack->head;
   mainStack->head->treeNode = parseTreeRoot;
 
-#ifdef DEBUG
-  // printf("Lexeme : %s Line count : %d\n\n", currToken.lexeme, currToken.lineCount);
-#endif
   while(!isEmpty() && currToken.eof == false){
     StackNode* currNode = top();
-#ifdef DEBUG
-    printf("From tree : %s\n", currNode->treeNode->isT ? terminalStrings[currNode->v.t] : nonTerminalStrings[currNode->v.non_t]);
-    printf("Parent of tree : %s\n", currNode->treeNode->parent ? nonTerminalStrings[currNode->treeNode->parent->v.non_t] : "ROOT");
-    printf("Right sibling of node : %s\n", currNode->treeNode->next ? currNode->treeNode->next->isT ? terminalStrings[currNode->treeNode->next->v.t] : nonTerminalStrings[currNode->treeNode->next->v.non_t] : "----");
-    printf("From stack : %s\n\n\n", currNode->isT ? terminalStrings[currNode->v.t] : nonTerminalStrings[currNode->v.non_t]);
-    printStack();
-    if(currNode->isT){
-      printf("Terminal: %s\n\n", terminalStrings[currNode->v.t]);
-    }else{
-      printf("Non-terminal: %s\n\n", nonTerminalStrings[currNode->v.non_t]);
+    printf("Token is: %s\n", terminalStrings[currToken.token]);
+    if(currToken.token == TK_COMMENT){
+      // CURRENT TOKEN IS A COMMENT
+      currToken = getToken(fp);
+      currToken.lineCount = lineCount;
+      continue;
+    }else if(currToken.token == TK_ERROR){
+      // LEXER ERROR DETECTED
+      currToken = getToken(fp);
+      currToken.lineCount = lineCount;
+      pop();
+      continue;
     }
-#endif
     if(currNode->isT){
+      // TOP OF THE STACK IS A TERMINAL
       if(currToken.token == currNode->v.t){
-        currToken.lineCount = lineCount;
-        currNode->treeNode->token = currToken;
+        // TOP OF STACK MATCHECD WITH INPUT TOKEN
         pop();
+        currNode->treeNode->token = currToken;
         currToken = getToken(fp);
+        currToken.lineCount = lineCount;
       }else{
+        // PARSER ERROR DETECTED (TOP OF STACK DID NOT MATCH WITH INPUT TOKEN)
         printf("Line %d Error: The token %s for lexeme %s does not match expected token %s\n", currToken.lineCount, terminalStrings[currToken.token], currToken.lexeme, terminalStrings[currNode->v.t]);
-        while(currToken.token != currNode->v.t && currToken.eof == false && mainStack->size > 1){
-          if (currNode->isT && PT->isSyn[currNode->v.non_t][currToken.token]) {
-            if (!PT->table[currNode->v.non_t][currToken.token]) {
-              pop();
-              continue;
-            }
-            break;
-          }
-          currToken = getToken(fp);
-        }
+        pop();
       }
     }else{
       ProductionRule* pr = PT->table[currNode->v.non_t][currToken.token];
@@ -1061,18 +1049,23 @@ void createParseTree(FILE* fp){
           currNode->treeNode->firstChild = firstChild;
         }
       }else{
+        // ENTRY IN PARSE TABLE NOT FOUND
         printf("Line %d Error: Invalid token %s encountered with value %s stack top %s\n", currToken.lineCount, terminalStrings[currToken.token], currToken.lexeme, terminalStrings[currNode->v.t]);
-        while(currToken.token != currNode->v.t && currToken.eof == false && mainStack->size > 1){
-          if (PT->isSyn[currNode->v.non_t][currToken.token]) {
-            if (PT->table[currNode->v.non_t][currToken.token]) {
-              break;
-            }
-            else {
+        if(currToken.eof == false && mainStack->size > 1){
+          /*if(!currNode->isT && PT->table[currNode->v.non_t][currToken.token]){*/
+          /*  break;*/
+          /*}*/
+          if (!currNode->isT && PT->isSyn[currNode->v.non_t][currToken.token]) {
               pop();
               continue;
-            }
           }
           currToken = getToken(fp);
+          currToken.lineCount = lineCount;
+          /*if(currToken.token == TK_COMMENT || currToken.token == TK_ERROR){*/
+          /*  currToken = getToken(fp);*/
+          /*  currToken.lineCount = lineCount;*/
+          /*  printf("Lexeme : %s\n", currToken.lexeme);*/
+          /*}*/
         }
       }
     }

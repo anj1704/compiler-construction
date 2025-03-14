@@ -11,6 +11,7 @@
 
 %The following program computes the average of marks of total d5cb34567  students
 _main 
+%This is a comment
 	type int : b5;
 	b5 <--- 1;
     return;
