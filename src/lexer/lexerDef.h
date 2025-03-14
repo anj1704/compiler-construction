@@ -9,7 +9,7 @@
 
 #define tableSize 100000000
 #define keywordCount 28
-#define terminalCount 59
+#define terminalCount 60 
 #define nonTerminalCount 53
 
 #define BUFFER_SIZE (1<<20) // check size of buffer
@@ -166,7 +166,8 @@ typedef enum {
     // Special Tokens
     TK_COMMENT,
     EPS,            // Epsilon
-    END_OF_INPUT
+    END_OF_INPUT,
+    TK_ERROR
 } terminals;
 
 

@@ -37,7 +37,7 @@ keyword* keywords[keywordCount];
 FILE *fp;
 char *endPtr, *startPtr;
 bool buffOneFlag, buffTwoFlag;
-int lineCount;
+int lineCount = 1;
 bool isEOF;
 bool loadBufferOne = true;
 bool loadBufferTwo = true;
@@ -72,7 +72,7 @@ int main() {
   char *cleanFile = "./Parser Test Cases/cleaned.txt";
   removeComments(sourceFile, cleanFile);
   
-  FILE *fp = initialise(cleanFile, BUFFER_SIZE);
+  FILE *fp = initialise(sourceFile, BUFFER_SIZE);
   if (!fp) {
     fprintf(stderr, "Failed to initialize lexer with file: %s\n", sourceFile);
     return 1;

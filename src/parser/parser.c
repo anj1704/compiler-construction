@@ -991,7 +991,10 @@ void createParseTree(FILE* fp){
   push(program, 0);
 
   SymTableItem currToken = getToken(fp);
-  currToken.lineCount = lineCount;
+  while(currToken.token == TK_COMMENT){
+    currToken = getToken(fp);
+    currToken.lineCount = lineCount;
+  }
 
   parseTreeRoot->parent = NULL;
   parseTreeRoot->firstChild = NULL;

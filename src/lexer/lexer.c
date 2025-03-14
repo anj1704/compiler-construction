@@ -225,20 +225,13 @@ SymTableItem error_helper(int error, char *lex, int line) {
   nextSymbolItem.realVal = 0.00;
   nextSymbolItem.lineCount = line;
   if (error == -2)
-    printf("Identified lexical error at line %d. Type: Unknown character %s\n",
-           line, lex);
+    printf("Line %d Error: Unknown character <%s> \n\n", line, lex);
   else if (error == -3)
-    printf("Identified lexical error at line %d. Type: Length of variable "
-           "identifier more than 20 in %s\n",
-           line, lex);
+    printf("Line %d Error: Length of variable identifier more than 20 in %s \n\n", line, lex);
   else if (error == -4)
-    printf("Identified lexical error at line %d. Type: Length of function "
-           "identifier more than 30 in %s\n",
-           line, lex);
+    printf("Line %d Error: Length of function identifier more than 30 in %s \n\n", line, lex);
   else 
-    printf("Identified lexical error at line %d. Type: Wrong sequence of "
-           "characters in %s\n",
-           line, getLexeme());
+    printf("Line %d Error: Unknown pattern in <%s> \n\n", line, lex);
   startPtr = endPtr;
   return nextSymbolItem;
 }
