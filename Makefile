@@ -1,15 +1,25 @@
-compiler:
-	gcc src/lexer/lexer.c src/parser/parser.c src/driver.c -o compiler
+CC          = gcc
+DEBUGFLAGS  = -DDEBUG
+SRCS        = src/lexer/lexer.c src/parser/parser.c src/driver.c
+EXE         = stage1exe
+DEBUG_EXE   = compiler_debug
 
-run: compiler
-	./compiler
+.PHONY: all clean run debug
+
+all: $(EXE)
+
+$(EXE): $(SRCS)
+	$(CC) $(SRCS) -o $(EXE)
+
+run: $(EXE)
+	./$(EXE) $(INPUT_FILE) $(OUTPUT_FILE)
+
+debug: $(SRCS)
+	$(CC) $(CFLAGS) $(DEBUGFLAGS) $(SRCS) -o $(DEBUG_EXE)
+	./$(DEBUG_EXE) $(ARGS)
 
 clean:
-	rm -rf compiler compiler_debug
+	rm -f $(EXE) $(DEBUG_EXE)
 
-debug:
-	gcc src/lexer/lexer.c src/parser/parser.c src/driver.c -o compiler_debug -DDEBUG
-	./compiler_debug
-
-all: clean compiler run
-@PHONY: compiler run clean debug all
+%:
+	@:
