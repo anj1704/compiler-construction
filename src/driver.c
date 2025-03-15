@@ -1,3 +1,9 @@
+/*Praneel Maddula - 2022A7PS0140P*/
+/*Anjaneya Bajaj  - 2022A7PS0164P*/
+/*Sundar Matu     - 2022A7PS0165P*/
+/*Siddharth CS    - 2022A7PS0133P*/
+/*Aryan Jain      - 2022A7PS0120P*/
+
 #include "lexer/lexer.h"
 #include "parser/parser.h"
 #include <time.h>
@@ -101,7 +107,7 @@ int main(int argc, char *argv[]) {
   }
 
   printf("File, buffers and symbol table initialized\n");
-  printf("\n***Lexical and syntax analysis modules implemented, all testcases functional***\n");
+  printf("\n***Lexical and syntax analysis modules implemented, all testcases functional.\nPossible issue: When running 2 directly without running 1 or running 2 for the first time, there is a possible issue in menu. Please run 2 again and check for the correct output.***\n");
   int option;
 
   lineCount = 1;

@@ -1,3 +1,9 @@
+/*Praneel Maddula - 2022A7PS0140P*/
+/*Anjaneya Bajaj  - 2022A7PS0164P*/
+/*Sundar Matu     - 2022A7PS0165P*/
+/*Siddharth CS    - 2022A7PS0133P*/
+/*Aryan Jain      - 2022A7PS0120P*/
+
 #ifndef LEXER
 #define LEXER
 #include "lexerDef.h"
