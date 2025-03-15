@@ -95,6 +95,11 @@ int main(int argc, char *argv[]) {
   printf("\n***Lexical and syntax analysis modules implemented, all testcases functional***\n");
   int option;
 
+  lineCount = 1;
+  start = clock();
+  createParseTree(fp);
+  end = clock();
+
   while (1) {
     for (int i = 0; i < 200; i++) {
       printf("=");
@@ -121,6 +126,8 @@ int main(int argc, char *argv[]) {
       break;
     }
     case 2: {
+      fclose(fp);
+      fp = initialise(sourceFile, BUFFER_SIZE);
       SymTableItem currToken;
       lineCount = 1;
       printf("*");
@@ -148,29 +155,15 @@ int main(int argc, char *argv[]) {
         printf("\n");
       }
 
-      // Re initialise fp for reuse
-      fclose(fp);
-      fp = initialise(sourceFile, BUFFER_SIZE);
       break;
     }
     case 3: {
-      lineCount = 1;
-      createParseTree(fp);
+      printf("Parsing.....\n");
       printParseTree(output);
-
-      // Re initialise fp for reuse
-      fclose(fp);
-      fp = initialise(sourceFile, BUFFER_SIZE);
-
-      // Add a destroy or reinitialise function for parser variables
-
+      printf("Please check %s for the Parse Table\n", outputFile);
       break;
     }
     case 4: {
-      lineCount = 1;
-      start = clock();
-      createParseTree(fp);
-      end = clock();
       double totalCPUTime = (double)(end - start);
       double totalCPUTimeInSeconds = totalCPUTime / CLOCKS_PER_SEC;
       printf("Total CPU time taken: %f\n", totalCPUTime);
