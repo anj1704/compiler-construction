@@ -1,5 +1,6 @@
 #include "parser.h"
 
+extern FILE* errors;
 extern char *terminalStrings[];
 extern char *nonTerminalStrings[];
 extern followDS *followOccurrence[nonTerminalCount];
@@ -1021,7 +1022,6 @@ void createParseTree(FILE* fp){
 
   while(!isEmpty() && currToken.eof == false){
     StackNode* currNode = top();
-    /*printf("Token is: %s\n", terminalStrings[currToken.token]);*/
     if(currToken.token == TK_COMMENT){
       // CURRENT TOKEN IS A COMMENT
       currToken = getToken(fp);
@@ -1043,7 +1043,7 @@ void createParseTree(FILE* fp){
         currToken.lineCount = lineCount;
       }else{
         // PARSER ERROR DETECTED (TOP OF STACK DID NOT MATCH WITH INPUT TOKEN)
-        printf("Line %d Error: The token %s for lexeme %s does not match expected token %s\n", currToken.lineCount, terminalStrings[currToken.token], currToken.lexeme, terminalStrings[currNode->v.t]);
+        fprintf(errors, "Line %d Error: The token %s for lexeme %s does not match expected token %s\n", currToken.lineCount, terminalStrings[currToken.token], currToken.lexeme, terminalStrings[currNode->v.t]);
         pop();
       }
     }else{
@@ -1068,7 +1068,7 @@ void createParseTree(FILE* fp){
         }
       }else{
         // ENTRY IN PARSE TABLE NOT FOUND
-        printf("Line %d Error: Invalid token %s encountered with value %s stack top %s\n", currToken.lineCount, terminalStrings[currToken.token], currToken.lexeme, nonTerminalStrings[currNode->v.nonT]);
+        fprintf(errors, "Line %d Error: Invalid token %s encountered with value %s stack top %s\n", currToken.lineCount, terminalStrings[currToken.token], currToken.lexeme, nonTerminalStrings[currNode->v.nonT]);
         if(currToken.eof == false && mainStack->size > 1){
           if (!currNode->isT && PT->isSyn[currNode->v.nonT][currToken.token]) {
               pop();
@@ -1081,11 +1081,11 @@ void createParseTree(FILE* fp){
     }
   }
   if (mainStack->size == 1 && currToken.eof == true) {
-    printf("Parsed the entire input\n");
+    fprintf(errors, "Parsed the entire input\n");
   } else if (mainStack->size == 1 && currToken.eof == false) {
-    printf("Error: Parsed the entire input but stack is not empty\n");
+    fprintf(errors, "Error: Parsed the entire input but stack is not empty\n");
   } else if (mainStack->size != 1 && currToken.eof == true) {
-    printf("Line %d Error: Stack is not empty but input is parsed\n", currToken.lineCount);
+    fprintf(errors, "Line %d Error: Stack is not empty but input is parsed\n", currToken.lineCount);
     while (mainStack->size > 1) {
       pop();
     }
@@ -1259,5 +1259,6 @@ void cleanGrammar() {
 
 void cleanParseTable() {
   // Make sure to clean grammar as well.
-  free(PT);
+  if (PT != NULL)
+    free(PT);
 }

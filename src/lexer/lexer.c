@@ -1,5 +1,6 @@
 #include "lexer.h"
 
+extern FILE* errors;
 extern char * terminalStrings[];
 extern char * nonTerminalsStrings[];
 extern bool loadBufferOne;
@@ -153,7 +154,7 @@ void initializeSymbolTable() {
 
 // Function to calculate hash
 int hash(char *lexeme) {
-  unsigned long hash = 6492;
+  unsigned long hash = 5381;
   int c;
   while ((c = *lexeme++)) {
     hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
@@ -226,13 +227,13 @@ SymTableItem errorHelper(int error, char *lex, int line) {
   nextSymbolItem.lineCount = line;
   nextSymbolItem.eof = 0;
   if (error == -2)
-    printf("Line %d Error: Unknown character <%s> \n\n", line, lex);
+    fprintf(errors, "Line %d Error: Unknown character <%s> \n\n", line, lex);
   else if (error == -3)
-    printf("Line %d Error: Length of variable identifier more than 20 in %s \n\n", line, lex);
+    fprintf(errors, "Line %d Error: Length of variable identifier more than 20 in %s \n\n", line, lex);
   else if (error == -4)
-    printf("Line %d Error: Length of function identifier more than 30 in %s \n\n", line, lex);
+    fprintf(errors, "Line %d Error: Length of function identifier more than 30 in %s \n\n", line, lex);
   else 
-    printf("Line %d Error: Unknown pattern in <%s> \n\n", line, lex);
+    fprintf(errors, "Line %d Error: Unknown pattern in <%s> \n\n", line, lex);
   startPtr = endPtr;
   return nextSymbolItem;
 }

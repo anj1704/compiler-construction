@@ -36,6 +36,7 @@ char* nonTerminalStrings[] = {
 SymTable *table;
 keyword* keywords[keywordCount];
 FILE *fp;
+FILE *errors;
 char *endPtr, *startPtr;
 bool buffOneFlag, buffTwoFlag;
 int lineCount = 1;
@@ -92,6 +93,13 @@ int main(int argc, char *argv[]) {
     fprintf(stderr, "Failed to open output file: %s\n", outputFile);
     return 1;
   }
+
+  errors = fopen("errors.txt", "w");
+  if(!errors)
+  {
+    fprintf(stderr, "Failed to make errors file\n");
+  }
+
   printf("File, buffers and symbol table initialized\n");
   printf("\n***Lexical and syntax analysis modules implemented, all testcases functional***\n");
   int option;
@@ -100,6 +108,8 @@ int main(int argc, char *argv[]) {
   start = clock();
   createParseTree(fp);
   end = clock();
+  fclose(errors);
+  fclose(fp);
 
   while (1) {
     printf("====================================================================================\n");
@@ -112,8 +122,10 @@ int main(int argc, char *argv[]) {
     scanf("%d", &option);
     printf("====================================================================================\n");
 
-    if (option == 0)
+    if (option == 0){
+      printf("Ending compiler session...\n");
       break;
+    }
 
     switch (option) {
     case 1: {
@@ -121,7 +133,6 @@ int main(int argc, char *argv[]) {
       break;
     }
     case 2: {
-      fclose(fp);
       fp = initialise(sourceFile, BUFFER_SIZE);
       SymTableItem currToken;
       lineCount = 1;
@@ -150,11 +161,18 @@ int main(int argc, char *argv[]) {
         printf("\n");
       }
 
+      fclose(fp);
       break;
     }
     case 3: {
       printf("Parsing.....\n");
       printParseTree(output);
+      errors = fopen("errors.txt", "r");
+      char line[1024];
+      while(fgets(line, sizeof(line), errors)){
+          printf("%s", line);
+        }
+      fclose(errors);
       printf("Please check %s for the Parse Table\n", outputFile);
       break;
     }
@@ -174,6 +192,7 @@ int main(int argc, char *argv[]) {
 
   fclose(fp);
   fclose(output);
+  remove("errors.txt");
 
   cleanTable();
   cleanKeywords();
