@@ -12,11 +12,11 @@ $(EXE): $(SRCS)
 	$(CC) $(SRCS) -o $(EXE)
 
 run: $(EXE)
-	./$(EXE) $(INPUT_FILE) $(OUTPUT_FILE)
+	./$(EXE) $(filter-out $@,$(MAKECMDGOALS))
 
 debug: $(SRCS)
 	$(CC) $(CFLAGS) $(DEBUGFLAGS) $(SRCS) -o $(DEBUG_EXE)
-	./$(DEBUG_EXE) $(ARGS)
+	./$(DEBUG_EXE) $(filter-out $@,$(MAKECMDGOALS))
 
 clean:
 	rm -f $(EXE) $(DEBUG_EXE)

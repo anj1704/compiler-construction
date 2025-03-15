@@ -112,11 +112,15 @@ int main(int argc, char *argv[]) {
     }
     printf("\n");
 
-    if (option == 0) break;
-    else if (option == 1) {
+    if (option == 0)
+      break;
+
+    switch (option) {
+    case 1: {
       removeComments(sourceFile);
+      break;
     }
-    else if (option == 2) {
+    case 2: {
       SymTableItem currToken;
       lineCount = 1;
       printf("*");
@@ -136,19 +140,33 @@ int main(int argc, char *argv[]) {
         if (currToken.eof) {
           break;
         }
-        printf("|%-25d|%-25s|%-25s|\n", currToken.lineCount, terminalStrings[currToken.token], currToken.lexeme);
+        printf("|%-25d|%-25s|%-25s|\n", currToken.lineCount,
+               terminalStrings[currToken.token], currToken.lexeme);
         for (int i = 0; i < 79; i++) {
           printf("-");
         }
         printf("\n");
       }
+
+      // Re initialise fp for reuse
+      fclose(fp);
+      fp = initialise(sourceFile, BUFFER_SIZE);
+      break;
     }
-    else if (option == 3) {
+    case 3: {
       lineCount = 1;
       createParseTree(fp);
       printParseTree(output);
+
+      // Re initialise fp for reuse
+      fclose(fp);
+      fp = initialise(sourceFile, BUFFER_SIZE);
+
+      // Add a destroy or reinitialise function for parser variables
+
+      break;
     }
-    else if (option == 4) {
+    case 4: {
       lineCount = 1;
       start = clock();
       createParseTree(fp);
@@ -157,6 +175,8 @@ int main(int argc, char *argv[]) {
       double totalCPUTimeInSeconds = totalCPUTime / CLOCKS_PER_SEC;
       printf("Total CPU time taken: %f\n", totalCPUTime);
       printf("Total CPU time in seconds: %f\n", totalCPUTimeInSeconds);
+      break;
+    }
     }
   }
 

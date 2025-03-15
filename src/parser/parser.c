@@ -1147,7 +1147,7 @@ void dfsHelper(TreeNode* currTreeNode, FILE* output){
   for (int i = 0; i < 181; ++i) {
     fprintf(output, "-");
   }
-  fprintf(output, "|");
+  fprintf(output, "|\n");
   
   while(firstChild){
     firstChild = firstChild->next;
@@ -1178,8 +1178,8 @@ void printParseTree(FILE* output){
   }
   fprintf(output, "|\n");
   fprintf(output, "|%-25s|%-25s|%-25s|%-25s|%-25s|%-25s|%-25s|\n", "Lexeme", "Line No.", "Token", "Value", "Parent Node", "Leaf Node", "Node Symbol");
-  fprintf(output, "|");
 
+  fprintf(output, "|");
   for (int i = 0; i < 181; ++i) {
     fprintf(output, "-");
   }
