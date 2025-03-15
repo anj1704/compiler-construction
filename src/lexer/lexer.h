@@ -2,13 +2,13 @@
 #define LEXER
 #include "lexerDef.h"
 
-FILE *initialise(char *inputFile, long long int buff_size);
+FILE *initialise(char *inputFile, long long int buffSize);
 void initializeSymbolTable();
 int hash(char *lexeme);
 void insert(char *lexeme, terminals token);
 SymTableItem *lookup(char *lexeme);
 void initializeKeywords();
-SymTableItem error_helper(int error, char *lex, int line);
+SymTableItem errorHelper(int error, char *lex, int line);
 char *getLexeme();
 FILE *getstream(FILE *fp);
 void removeComments(char *testFile);

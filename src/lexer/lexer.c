@@ -55,7 +55,7 @@ void removeComments(char *testCaseFile) {
 }
 
 // initialising lexer
-FILE *initialise(char *inputFile, long long int buff_size) {
+FILE *initialise(char *inputFile, long long int buffSize) {
   memset(tBuff.bufferOne, 0, sizeof(tBuff.bufferOne));
   memset(tBuff.bufferTwo, 0, sizeof(tBuff.bufferTwo));
   FILE *fileptr = fopen(inputFile, "r");
@@ -211,7 +211,7 @@ SymTableItem *lookup(char *lexeme) {
 }
 
 // error handling
-SymTableItem error_helper(int error, char *lex, int line) {
+SymTableItem errorHelper(int error, char *lex, int line) {
   SymTableItem nextSymbolItem;
   nextSymbolItem.token = TK_ERROR;
   nextSymbolItem.lexeme = NULL;
@@ -232,14 +232,14 @@ SymTableItem error_helper(int error, char *lex, int line) {
 }
 
 char *getLexeme() {
-  int length_lexeme;
+  int lengthLexeme;
   char *lexeme;
 
   if ((startPtr >= tBuff.bufferOne &&
        startPtr < tBuff.bufferOne + BUFFER_SIZE) &&
       (endPtr >= tBuff.bufferOne && endPtr <= tBuff.bufferOne + BUFFER_SIZE)) {
 
-    length_lexeme = endPtr - startPtr;
+    lengthLexeme = endPtr - startPtr;
   }
 
   else if ((startPtr >= tBuff.bufferTwo &&
@@ -247,13 +247,13 @@ char *getLexeme() {
            (endPtr >= tBuff.bufferTwo &&
             endPtr <= tBuff.bufferTwo + BUFFER_SIZE)) {
 
-    length_lexeme = endPtr - startPtr;
+    lengthLexeme = endPtr - startPtr;
   } else {
-    length_lexeme =
+    lengthLexeme =
         tBuff.bufferOne + BUFFER_SIZE - startPtr + endPtr - tBuff.bufferTwo;
   }
 
-  lexeme = (char *)malloc((length_lexeme + 1) * sizeof(char));
+  lexeme = (char *)malloc((lengthLexeme + 1) * sizeof(char));
 
   if (!lexeme) {
     fprintf(stderr, "Mem allocation failed");
@@ -264,24 +264,24 @@ char *getLexeme() {
        startPtr < tBuff.bufferOne + BUFFER_SIZE) &&
       (endPtr >= tBuff.bufferOne && endPtr <= tBuff.bufferOne + BUFFER_SIZE)) {
 
-    strncpy(lexeme, startPtr, length_lexeme);
+    strncpy(lexeme, startPtr, lengthLexeme);
   }
 
   else if ((startPtr >= tBuff.bufferTwo &&
             startPtr < tBuff.bufferTwo + BUFFER_SIZE) &&
            (endPtr >= tBuff.bufferTwo &&
             endPtr <= tBuff.bufferTwo + BUFFER_SIZE)) {
-    strncpy(lexeme, startPtr, length_lexeme);
+    strncpy(lexeme, startPtr, lengthLexeme);
 
   } else {
 
     int firstPartLength = tBuff.bufferOne + BUFFER_SIZE - startPtr;
     strncpy(lexeme, startPtr, firstPartLength);
     strncpy(lexeme + firstPartLength, tBuff.bufferTwo,
-            length_lexeme - firstPartLength);
+            lengthLexeme - firstPartLength);
   }
 
-  lexeme[length_lexeme] = '\0';
+  lexeme[lengthLexeme] = '\0';
 
   return lexeme;
 }
@@ -361,12 +361,12 @@ SymTableItem tokenize(char *lex, terminals g, int line) {
     }
   case TK_ID:
     if (strlen(nextSymbolItem->lexeme) > 20) {
-      return error_helper(-3, lex, line);
+      return errorHelper(-3, lex, line);
     }
     break;
   case TK_FUNID:
     if (strlen(nextSymbolItem->lexeme) > 30) {
-      return error_helper(-4, lex, line);
+      return errorHelper(-4, lex, line);
     }
     break;
   }
@@ -979,7 +979,7 @@ SymTableItem getToken(FILE *fp) {
 
   if (dfastate < 0) {
     lexeme = getLexeme();
-    return error_helper(dfastate, lexeme, lineCount);
+    return errorHelper(dfastate, lexeme, lineCount);
   }
 
   newSymbolItem.lexeme = NULL;

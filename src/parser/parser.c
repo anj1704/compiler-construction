@@ -5,9 +5,9 @@
 
 extern char *terminalStrings[];
 extern char *nonTerminalStrings[];
-extern followDS *follow_occurrence[nonTerminalCount];
+extern followDS *followOccurrence[nonTerminalCount];
 extern Grammar *G;
-extern non_terminal_sets first_follow_sets[nonTerminalCount];
+extern nonTerminalSets firstFollowSets[nonTerminalCount];
 extern ParseTable *PT;
 extern gitems **itemList;
 extern Stack* mainStack;
@@ -20,7 +20,7 @@ gitems *createNonTerminal(nonTerminals nt) {
     printf("Failed to allocate memory for Non Terminal\n");
   } else {
     item->isTer = false;
-    item->v.non_t = nt;
+    item->v.nonT = nt;
   }
   return item;
 }
@@ -59,14 +59,14 @@ ProductionRule *createProductionRule() {
   if (!rule)
     printf("Failed to allocate memory for ProductionRule\n");
   else {
-    rule->next_rule = NULL;
+    rule->nextRule = NULL;
     rule->head = NULL;
   }
   return rule;
 }
 
-terminal_list *createTerminalList() {
-  terminal_list *list = (terminal_list *)malloc(sizeof(terminal_list));
+terminalList *createTerminalList() {
+  terminalList *list = (terminalList *)malloc(sizeof(terminalList));
   if (!list)
     printf("Failed to allocate memory for Terminal List\n");
   else
@@ -74,8 +74,8 @@ terminal_list *createTerminalList() {
   return list;
 }
 
-terminal_node *createTerminalNode() {
-  terminal_node *node = (terminal_node *)malloc(sizeof(terminal_node));
+terminalNode *createTerminalNode() {
+  terminalNode *node = (terminalNode *)malloc(sizeof(terminalNode));
   if (!node)
     printf("Failed to allocate memory for Terminal Node\n");
   else
@@ -122,37 +122,37 @@ void addrule(nonTerminals nt, int size, gitems value[]) {
     G->rules[nt] = lhsNode;
     return;
   }
-  if (currentrulehead->next_rule != NULL) {
-    while (currentrulehead->next_rule != NULL)
-      currentrulehead = currentrulehead->next_rule;
+  if (currentrulehead->nextRule != NULL) {
+    while (currentrulehead->nextRule != NULL)
+      currentrulehead = currentrulehead->nextRule;
   }
-  currentrulehead->next_rule = newRule;
+  currentrulehead->nextRule = newRule;
 
   // Add the LHSNode to the grammar
   G->rules[nt] = lhsNode;
 }
 
 void addGrammarRules() {
-  gitems i1[2] = {{false, {.non_t = otherFunctions}},
-                  {false, {.non_t = mainFunction}}};
+  gitems i1[2] = {{false, {.nonT = otherFunctions}},
+                  {false, {.nonT = mainFunction}}};
   addrule(program, 2, i1);
 
   gitems i2[3] = {
-      {true, {TK_MAIN}}, {false, {.non_t = stmts}}, {true, {TK_END}}};
+      {true, {TK_MAIN}}, {false, {.nonT = stmts}}, {true, {TK_END}}};
   addrule(mainFunction, 3, i2);
 
-  gitems i3a[2] = {{false, {.non_t = function}},
-                   {false, {.non_t = otherFunctions}}};
+  gitems i3a[2] = {{false, {.nonT = function}},
+                   {false, {.nonT = otherFunctions}}};
   addrule(otherFunctions, 2, i3a);
 
   gitems i3b[1] = {{true, {EPS}}};
   addrule(otherFunctions, 1, i3b);
 
   gitems i4[6] = {{true, {TK_FUNID}},
-                  {false, {.non_t = input_par}},
-                  {false, {.non_t = output_par}},
+                  {false, {.nonT = inputPar}},
+                  {false, {.nonT = outputPar}},
                   {true, {TK_SEM}},
-                  {false, {.non_t = stmts}},
+                  {false, {.nonT = stmts}},
                   {true, {TK_END}}};
   addrule(function, 6, i4);
 
@@ -160,30 +160,30 @@ void addGrammarRules() {
                   {true, {TK_PARAMETER}},
                   {true, {TK_LIST}},
                   {true, {TK_SQL}},
-                  {false, {.non_t = parameter_list}},
+                  {false, {.nonT = parameterList}},
                   {true, {TK_SQR}}};
-  addrule(input_par, 6, i5);
+  addrule(inputPar, 6, i5);
 
   gitems i6a[6] = {{true, {TK_OUTPUT}},
                    {true, {TK_PARAMETER}},
                    {true, {TK_LIST}},
                    {true, {TK_SQL}},
-                   {false, {.non_t = parameter_list}},
+                   {false, {.nonT = parameterList}},
                    {true, {TK_SQR}}};
-  addrule(output_par, 6, i6a);
+  addrule(outputPar, 6, i6a);
 
   gitems i6b[1] = {{true, {EPS}}};
-  addrule(output_par, 1, i6b);
+  addrule(outputPar, 1, i6b);
 
-  gitems i7[3] = {{false, {.non_t = dataType}},
+  gitems i7[3] = {{false, {.nonT = dataType}},
                   {true, {TK_ID}},
-                  {false, {.non_t = remaining_list}}};
-  addrule(parameter_list, 3, i7);
+                  {false, {.nonT = remainingList}}};
+  addrule(parameterList, 3, i7);
 
-  gitems i8a[1] = {{false, {.non_t = primitiveDatatype}}};
+  gitems i8a[1] = {{false, {.nonT = primitiveDatatype}}};
   addrule(dataType, 1, i8a);
 
-  gitems i8b[1] = {{false, {.non_t = constructedDatatype}}};
+  gitems i8b[1] = {{false, {.nonT = constructedDatatype}}};
   addrule(dataType, 1, i8b);
 
   gitems i9a[1] = {{true, {TK_INT}}};
@@ -201,145 +201,145 @@ void addGrammarRules() {
   gitems i10c[1] = {{true, {TK_RUID}}};
   addrule(constructedDatatype, 1, i10c);
 
-  gitems i11a[2] = {{true, {TK_COMMA}}, {false, {.non_t = parameter_list}}};
-  addrule(remaining_list, 2, i11a);
+  gitems i11a[2] = {{true, {TK_COMMA}}, {false, {.nonT = parameterList}}};
+  addrule(remainingList, 2, i11a);
 
   gitems i11b[1] = {{true, {EPS}}};
-  addrule(remaining_list, 1, i11b);
+  addrule(remainingList, 1, i11b);
 
-  gitems i12[4] = {{false, {.non_t = typeDefinitions}},
-                   {false, {.non_t = declarations}},
-                   {false, {.non_t = otherStmts}},
-                   {false, {.non_t = returnStmt}}};
+  gitems i12[4] = {{false, {.nonT = typeDefinitions}},
+                   {false, {.nonT = declarations}},
+                   {false, {.nonT = otherStmts}},
+                   {false, {.nonT = returnStmt}}};
   addrule(stmts, 4, i12);
 
-  gitems i13a1[2] = {{false, {.non_t = actualOrRedefined}},
-                     {false, {.non_t = typeDefinitions}}};
+  gitems i13a1[2] = {{false, {.nonT = actualOrRedefined}},
+                     {false, {.nonT = typeDefinitions}}};
   addrule(typeDefinitions, 2, i13a1);
 
   gitems i13a2[1] = {{true, {EPS}}};
   addrule(typeDefinitions, 1, i13a2);
 
-  gitems i13b1[1] = {{false, {.non_t = typeDefinition}}};
+  gitems i13b1[1] = {{false, {.nonT = typeDefinition}}};
   addrule(actualOrRedefined, 1, i13b1);
 
-  gitems i13b2[1] = {{false, {.non_t = definetypestmt}}};
+  gitems i13b2[1] = {{false, {.nonT = definetypestmt}}};
   addrule(actualOrRedefined, 1, i13b2);
 
   gitems i14[4] = {{true, {TK_RECORD}},
                    {true, {TK_RUID}},
-                   {false, {.non_t = fieldDefinitions}},
+                   {false, {.nonT = fieldDefinitions}},
                    {true, {TK_ENDRECORD}}};
   addrule(typeDefinition, 4, i14);
 
   gitems i15[4] = {{true, {TK_UNION}},
                    {true, {TK_RUID}},
-                   {false, {.non_t = fieldDefinitions}},
+                   {false, {.nonT = fieldDefinitions}},
                    {true, {TK_ENDUNION}}};
   addrule(typeDefinition, 4, i15);
 
-  gitems i16[3] = {{false, {.non_t = fieldDefinition}},
-                   {false, {.non_t = fieldDefinition}},
-                   {false, {.non_t = moreFields}}};
+  gitems i16[3] = {{false, {.nonT = fieldDefinition}},
+                   {false, {.nonT = fieldDefinition}},
+                   {false, {.nonT = moreFields}}};
   addrule(fieldDefinitions, 3, i16);
 
   gitems i17a[5] = {{true, {TK_TYPE}},
-                    {false, {.non_t = fieldtype}},
+                    {false, {.nonT = fieldtype}},
                     {true, {TK_COLON}},
                     {true, {TK_FIELDID}},
                     {true, {TK_SEM}}};
   addrule(fieldDefinition, 5, i17a);
 
-  gitems i17b[1] = {{false, {.non_t = primitiveDatatype}}};
+  gitems i17b[1] = {{false, {.nonT = primitiveDatatype}}};
   addrule(fieldtype, 1, i17b);
 
-  gitems i17c[1] = {{false, {.non_t = constructedDatatype}}};
+  gitems i17c[1] = {{false, {.nonT = constructedDatatype}}};
   addrule(fieldtype, 1, i17c);
 
-  gitems i18a[2] = {{false, {.non_t = fieldDefinition}},
-                    {false, {.non_t = moreFields}}};
+  gitems i18a[2] = {{false, {.nonT = fieldDefinition}},
+                    {false, {.nonT = moreFields}}};
   addrule(moreFields, 2, i18a);
 
   gitems i18b[1] = {{true, {EPS}}};
   addrule(moreFields, 1, i18b);
 
-  gitems i19a[2] = {{false, {.non_t = declaration}},
-                    {false, {.non_t = declarations}}};
+  gitems i19a[2] = {{false, {.nonT = declaration}},
+                    {false, {.nonT = declarations}}};
   addrule(declarations, 2, i19a);
 
   gitems i19b[1] = {{true, {EPS}}};
   addrule(declarations, 1, i19b);
 
   gitems i20[6] = {
-      {true, {TK_TYPE}}, {false, {.non_t = dataType}},      {true, {TK_COLON}},
-      {true, {TK_ID}},   {false, {.non_t = global_or_not}}, {true, {TK_SEM}}};
+      {true, {TK_TYPE}}, {false, {.nonT = dataType}},      {true, {TK_COLON}},
+      {true, {TK_ID}},   {false, {.nonT = globalOrNot}}, {true, {TK_SEM}}};
   addrule(declaration, 6, i20);
 
   gitems i21a[2] = {{true, {TK_COLON}}, {true, {TK_GLOBAL}}};
-  addrule(global_or_not, 2, i21a);
+  addrule(globalOrNot, 2, i21a);
 
   gitems i21b[1] = {{true, {EPS}}};
-  addrule(global_or_not, 1, i21b);
+  addrule(globalOrNot, 1, i21b);
 
-  gitems i22a[2] = {{false, {.non_t = stmt}}, {false, {.non_t = otherStmts}}};
+  gitems i22a[2] = {{false, {.nonT = stmt}}, {false, {.nonT = otherStmts}}};
   addrule(otherStmts, 2, i22a);
 
   gitems i22b[1] = {{true, {EPS}}};
   addrule(otherStmts, 1, i22b);
 
-  gitems i23a[1] = {{false, {.non_t = assignmentStmt}}};
+  gitems i23a[1] = {{false, {.nonT = assignmentStmt}}};
   addrule(stmt, 1, i23a);
 
-  gitems i23b[1] = {{false, {.non_t = iterativeStmt}}};
+  gitems i23b[1] = {{false, {.nonT = iterativeStmt}}};
   addrule(stmt, 1, i23b);
 
-  gitems i23c[1] = {{false, {.non_t = conditionalStmt}}};
+  gitems i23c[1] = {{false, {.nonT = conditionalStmt}}};
   addrule(stmt, 1, i23c);
 
-  gitems i23d[1] = {{false, {.non_t = ioStmt}}};
+  gitems i23d[1] = {{false, {.nonT = ioStmt}}};
   addrule(stmt, 1, i23d);
 
-  gitems i23e[1] = {{false, {.non_t = funCallStmt}}};
+  gitems i23e[1] = {{false, {.nonT = funCallStmt}}};
   addrule(stmt, 1, i23e);
 
-  gitems i24[4] = {{false, {.non_t = singleOrRecId}},
+  gitems i24[4] = {{false, {.nonT = singleOrRecId}},
                    {true, {TK_ASSIGNOP}},
-                   {false, {.non_t = arithmeticExpression}},
+                   {false, {.nonT = arithmeticExpression}},
                    {true, {TK_SEM}}};
   addrule(assignmentStmt, 4, i24);
 
   gitems i25a[2] = {{true, {TK_ID}},
-                    {false, {.non_t = option_single_constructed}}};
+                    {false, {.nonT = optionSingleConstructed}}};
   addrule(singleOrRecId, 2, i25a);
 
-  gitems i25b[2] = {{false, {.non_t = oneExpansion}},
-                    {false, {.non_t = moreExpansions}}};
-  addrule(option_single_constructed, 2, i25b);
+  gitems i25b[2] = {{false, {.nonT = oneExpansion}},
+                    {false, {.nonT = moreExpansions}}};
+  addrule(optionSingleConstructed, 2, i25b);
 
   gitems i25p[1] = {{true, {EPS}}};
-  addrule(option_single_constructed, 1, i25p);
+  addrule(optionSingleConstructed, 1, i25p);
 
   gitems i25c[2] = {{true, {TK_DOT}}, {true, {TK_FIELDID}}};
   addrule(oneExpansion, 2, i25c);
 
-  gitems i25d[2] = {{false, {.non_t = oneExpansion}},
-                    {false, {.non_t = moreExpansions}}};
+  gitems i25d[2] = {{false, {.nonT = oneExpansion}},
+                    {false, {.nonT = moreExpansions}}};
   addrule(moreExpansions, 2, i25d);
 
   gitems i25e[1] = {{true, {EPS}}};
   addrule(moreExpansions, 1, i25e);
 
-  gitems i26[7] = {{false, {.non_t = outputParameters}},
+  gitems i26[7] = {{false, {.nonT = outputParameters}},
                    {true, {TK_CALL}},
                    {true, {TK_FUNID}},
                    {true, {TK_WITH}},
                    {true, {TK_PARAMETERS}},
-                   {false, {.non_t = inputParameters}},
+                   {false, {.nonT = inputParameters}},
                    {true, {TK_SEM}}};
   addrule(funCallStmt, 7, i26);
 
   gitems i27a[4] = {{true, {TK_SQL}},
-                    {false, {.non_t = idList}},
+                    {false, {.nonT = idList}},
                     {true, {TK_SQR}},
                     {true, {TK_ASSIGNOP}}};
   addrule(outputParameters, 4, i27a);
@@ -348,31 +348,31 @@ void addGrammarRules() {
   addrule(outputParameters, 1, i27b);
 
   gitems i28[3] = {
-      {true, {TK_SQL}}, {false, {.non_t = idList}}, {true, {TK_SQR}}};
+      {true, {TK_SQL}}, {false, {.nonT = idList}}, {true, {TK_SQR}}};
   addrule(inputParameters, 3, i28);
 
   gitems i29[7] = {{true, {TK_WHILE}},
                    {true, {TK_OP}},
-                   {false, {.non_t = booleanExpression}},
+                   {false, {.nonT = booleanExpression}},
                    {true, {TK_CL}},
-                   {false, {.non_t = stmt}},
-                   {false, {.non_t = otherStmts}},
+                   {false, {.nonT = stmt}},
+                   {false, {.nonT = otherStmts}},
                    {true, {TK_ENDWHILE}}};
   addrule(iterativeStmt, 7, i29);
 
   gitems i30[8] = {{true, {TK_IF}},
                    {true, {TK_OP}},
-                   {false, {.non_t = booleanExpression}},
+                   {false, {.nonT = booleanExpression}},
                    {true, {TK_CL}},
                    {true, {TK_THEN}},
-                   {false, {.non_t = stmt}},
-                   {false, {.non_t = otherStmts}},
-                   {false, {.non_t = elsePart}}};
+                   {false, {.nonT = stmt}},
+                   {false, {.nonT = otherStmts}},
+                   {false, {.nonT = elsePart}}};
   addrule(conditionalStmt, 8, i30);
 
   gitems i31a[4] = {{true, {TK_ELSE}},
-                    {false, {.non_t = stmt}},
-                    {false, {.non_t = otherStmts}},
+                    {false, {.nonT = stmt}},
+                    {false, {.nonT = otherStmts}},
                     {true, {TK_ENDIF}}};
   addrule(elsePart, 4, i31a);
 
@@ -381,46 +381,46 @@ void addGrammarRules() {
 
   gitems i32a[5] = {{true, {TK_READ}},
                     {true, {TK_OP}},
-                    {false, {.non_t = var}},
+                    {false, {.nonT = var}},
                     {true, {TK_CL}},
                     {true, {TK_SEM}}};
   addrule(ioStmt, 5, i32a);
 
   gitems i32b[5] = {{true, {TK_WRITE}},
                     {true, {TK_OP}},
-                    {false, {.non_t = var}},
+                    {false, {.nonT = var}},
                     {true, {TK_CL}},
                     {true, {TK_SEM}}};
   addrule(ioStmt, 5, i32b);
 
-  gitems i33a[2] = {{false, {.non_t = term}}, {false, {.non_t = expPrime}}};
+  gitems i33a[2] = {{false, {.nonT = term}}, {false, {.nonT = expPrime}}};
   addrule(arithmeticExpression, 2, i33a);
 
-  gitems i33b1[3] = {{false, {.non_t = lowPrecedenceOperators}},
-                     {false, {.non_t = term}},
-                     {false, {.non_t = expPrime}}};
+  gitems i33b1[3] = {{false, {.nonT = lowPrecedenceOperators}},
+                     {false, {.nonT = term}},
+                     {false, {.nonT = expPrime}}};
   addrule(expPrime, 3, i33b1);
 
   gitems i33b2[1] = {{true, {EPS}}};
   addrule(expPrime, 1, i33b2);
 
-  gitems i33c[2] = {{false, {.non_t = factor}}, {false, {.non_t = termPrime}}};
+  gitems i33c[2] = {{false, {.nonT = factor}}, {false, {.nonT = termPrime}}};
   addrule(term, 2, i33c);
 
-  gitems i34a[3] = {{false, {.non_t = highPrecedenceOperators}},
-                    {false, {.non_t = factor}},
-                    {false, {.non_t = termPrime}}};
+  gitems i34a[3] = {{false, {.nonT = highPrecedenceOperators}},
+                    {false, {.nonT = factor}},
+                    {false, {.nonT = termPrime}}};
   addrule(termPrime, 3, i34a);
 
   gitems i34b[1] = {{true, {EPS}}};
   addrule(termPrime, 1, i34b);
 
   gitems i35a1[3] = {{true, {TK_OP}},
-                     {false, {.non_t = arithmeticExpression}},
+                     {false, {.nonT = arithmeticExpression}},
                      {true, {TK_CL}}};
   addrule(factor, 3, i35a1);
 
-  gitems i35a2[1] = {{false, {.non_t = var}}};
+  gitems i35a2[1] = {{false, {.nonT = var}}};
   addrule(factor, 1, i35a2);
 
   gitems i35b1[1] = {{true, {TK_MUL}}};
@@ -435,24 +435,24 @@ void addGrammarRules() {
   gitems i35c2[1] = {{true, {TK_MINUS}}};
   addrule(lowPrecedenceOperators, 1, i35c2);
 
-  gitems i36[7] = {{true, {TK_OP}}, {false, {.non_t = booleanExpression}},
-                   {true, {TK_CL}}, {false, {.non_t = logicalOp}},
-                   {true, {TK_OP}}, {false, {.non_t = booleanExpression}},
+  gitems i36[7] = {{true, {TK_OP}}, {false, {.nonT = booleanExpression}},
+                   {true, {TK_CL}}, {false, {.nonT = logicalOp}},
+                   {true, {TK_OP}}, {false, {.nonT = booleanExpression}},
                    {true, {TK_CL}}};
   addrule(booleanExpression, 7, i36);
 
-  gitems i37[3] = {{false, {.non_t = var}},
-                   {false, {.non_t = relationalOp}},
-                   {false, {.non_t = var}}};
+  gitems i37[3] = {{false, {.nonT = var}},
+                   {false, {.nonT = relationalOp}},
+                   {false, {.nonT = var}}};
   addrule(booleanExpression, 3, i37);
 
   gitems i38[4] = {{true, {TK_NOT}},
                    {true, {TK_OP}},
-                   {false, {.non_t = booleanExpression}},
+                   {false, {.nonT = booleanExpression}},
                    {true, {TK_CL}}};
   addrule(booleanExpression, 4, i38);
 
-  gitems i39a[1] = {{false, {.non_t = singleOrRecId}}};
+  gitems i39a[1] = {{false, {.nonT = singleOrRecId}}};
   addrule(var, 1, i39a);
 
   gitems i39b[1] = {{true, {TK_NUM}}};
@@ -486,28 +486,28 @@ void addGrammarRules() {
   addrule(relationalOp, 1, i41f);
 
   gitems i42[3] = {{true, {TK_RETURN}},
-                   {false, {.non_t = optionalReturn}},
+                   {false, {.nonT = optionalReturn}},
                    {true, {TK_SEM}}};
   addrule(returnStmt, 3, i42);
 
   gitems i43a[3] = {
-      {true, {TK_SQL}}, {false, {.non_t = idList}}, {true, {TK_SQR}}};
+      {true, {TK_SQL}}, {false, {.nonT = idList}}, {true, {TK_SQR}}};
   addrule(optionalReturn, 3, i43a);
 
   gitems i43b[1] = {{true, {EPS}}};
   addrule(optionalReturn, 1, i43b);
 
-  gitems i44[2] = {{true, {TK_ID}}, {false, {.non_t = more_ids}}};
+  gitems i44[2] = {{true, {TK_ID}}, {false, {.nonT = moreIds}}};
   addrule(idList, 2, i44);
 
-  gitems i45a[2] = {{true, {TK_COMMA}}, {false, {.non_t = idList}}};
-  addrule(more_ids, 2, i45a);
+  gitems i45a[2] = {{true, {TK_COMMA}}, {false, {.nonT = idList}}};
+  addrule(moreIds, 2, i45a);
 
   gitems i45b[1] = {{true, {EPS}}};
-  addrule(more_ids, 1, i45b);
+  addrule(moreIds, 1, i45b);
 
   gitems i46[5] = {{true, {TK_DEFINETYPE}},
-                   {false, {.non_t = A}},
+                   {false, {.nonT = A}},
                    {true, {TK_RUID}},
                    {true, {TK_AS}},
                    {true, {TK_RUID}}};
@@ -520,60 +520,60 @@ void addGrammarRules() {
   addrule(A, 1, i47b);
 }
 
-void compute_first(nonTerminals given_nt) {
-  if (first_follow_sets[given_nt].first_set)
+void computeFirst(nonTerminals givenNt) {
+  if (firstFollowSets[givenNt].firstSet)
     return;
 
 #ifdef DEBUG
-  printf("compute_first start: %s\n", nonTerminalStrings[given_nt]);
+  printf("computeFirst start: %s\n", nonTerminalStrings[givenNt]);
 #endif
-  first_follow_sets[given_nt].first_set = createTerminalList();
+  firstFollowSets[givenNt].firstSet = createTerminalList();
 
-  LHSNode *lhs = G->rules[given_nt];
+  LHSNode *lhs = G->rules[givenNt];
   for (ProductionRule *rule = lhs->rules; rule != NULL;
-       rule = rule->next_rule) {
+       rule = rule->nextRule) {
     for (RHSNode *rhs = rule->head; rhs != NULL; rhs = rhs->next) {
       if (rhs->isT) {
 #ifdef DEBUG
         printf("terminal: %s\n", terminalStrings[rhs->v.t]);
 #endif
-        add_terminal_tolist(first_follow_sets[given_nt].first_set, rhs->v.t);
+        addTerminalTolist(firstFollowSets[givenNt].firstSet, rhs->v.t);
         break;
       } else {
 #ifdef DEBUG
-        printf("non terminal: %s\n", nonTerminalStrings[rhs->v.non_t]);
+        printf("non terminal: %s\n", nonTerminalStrings[rhs->v.nonT]);
 #endif
-        compute_first(rhs->v.non_t);
-        join_terminal_list(first_follow_sets[given_nt].first_set,
-                           first_follow_sets[rhs->v.non_t].first_set);
+        computeFirst(rhs->v.nonT);
+        joinTerminalList(firstFollowSets[givenNt].firstSet,
+                           firstFollowSets[rhs->v.nonT].firstSet);
 
         // Made change to check if all non-terminals contain an EChanged
-        if (contains_epsilon(first_follow_sets[rhs->v.non_t].first_set) && (rhs->next != NULL)) {
-          remove_epsilon(first_follow_sets[given_nt].first_set);
+        if (containsEpsilon(firstFollowSets[rhs->v.nonT].firstSet) && (rhs->next != NULL)) {
+          removeEpsilon(firstFollowSets[givenNt].firstSet);
         } else
           break;
       }
     }
   }
 #ifdef DEBUG
-  printf("compute_first done: %s\n", nonTerminalStrings[given_nt]);
+  printf("computeFirst done: %s\n", nonTerminalStrings[givenNt]);
 #endif
 }
 
-void compute_firsts() {
+void computeFirsts() {
   for (int i = 0; i < nonTerminalCount; i++) {
-    compute_first(i);
+    computeFirst(i);
   }
 }
 
-void add_terminal_tolist(terminal_list *list, terminals t) {
+void addTerminalTolist(terminalList *list, terminals t) {
 
   if (list->head == NULL) {
     list->head = createTerminalNode();
     list->head->t = t;
   } else {
-    terminal_node *cur = list->head;
-    terminal_node *prev = NULL;
+    terminalNode *cur = list->head;
+    terminalNode *prev = NULL;
 
     while (cur != NULL) {
       if (cur->t == t) {
@@ -584,7 +584,7 @@ void add_terminal_tolist(terminal_list *list, terminals t) {
       cur = cur->next;
     }
 
-    terminal_node *newnode = createTerminalNode();
+    terminalNode *newnode = createTerminalNode();
     newnode->t = t;
     newnode->next = NULL;
 
@@ -594,15 +594,15 @@ void add_terminal_tolist(terminal_list *list, terminals t) {
   }
 }
 
-void join_terminal_list(terminal_list *l1, terminal_list *l2) {
+void joinTerminalList(terminalList *l1, terminalList *l2) {
   if (l1 == NULL || l2 == NULL || l2->head == NULL) {
     return;
   }
 
-  terminal_node *cur = l2->head;
+  terminalNode *cur = l2->head;
 
   while (cur != NULL) {
-    terminal_node *search = l1->head;
+    terminalNode *search = l1->head;
     bool found = false;
 
     while (search != NULL) {
@@ -614,7 +614,7 @@ void join_terminal_list(terminal_list *l1, terminal_list *l2) {
     }
 
     if (!found) {
-      terminal_node *newnode = createTerminalNode();
+      terminalNode *newnode = createTerminalNode();
 
       if (newnode == NULL) {
         fprintf(stderr, "memory allocation failed\n");
@@ -627,7 +627,7 @@ void join_terminal_list(terminal_list *l1, terminal_list *l2) {
       if (l1->head == NULL) {
         l1->head = newnode;
       } else {
-        terminal_node *last = l1->head;
+        terminalNode *last = l1->head;
         while (last->next != NULL) {
           last = last->next;
         }
@@ -639,8 +639,8 @@ void join_terminal_list(terminal_list *l1, terminal_list *l2) {
   }
 }
 
-bool contains_epsilon(terminal_list *given_list) {
-  terminal_node *temp = given_list->head;
+bool containsEpsilon(terminalList *givenList) {
+  terminalNode *temp = givenList->head;
   while (temp != NULL) {
     if (temp->t == EPS) {
       return true;
@@ -650,11 +650,11 @@ bool contains_epsilon(terminal_list *given_list) {
   return false;
 }
 
-void remove_epsilon(terminal_list *given_list) {
-  terminal_node *temp = given_list->head;
-  terminal_node *prev = NULL;
+void removeEpsilon(terminalList *givenList) {
+  terminalNode *temp = givenList->head;
+  terminalNode *prev = NULL;
   if (temp != NULL && temp->t == EPS) {
-    given_list->head = temp->next;
+    givenList->head = temp->next;
     free(temp);
     return;
   }
@@ -672,27 +672,27 @@ void remove_epsilon(terminal_list *given_list) {
   return;
 }
 
-void compute_follow() {
-  if (first_follow_sets[program].follow_set == NULL) {
-    first_follow_sets[program].follow_set = createTerminalList();
+void computeFollow() {
+  if (firstFollowSets[program].followSet == NULL) {
+    firstFollowSets[program].followSet = createTerminalList();
   }
 
-  add_terminal_tolist(first_follow_sets[program].follow_set, END_OF_INPUT);
+  addTerminalTolist(firstFollowSets[program].followSet, END_OF_INPUT);
 
-  populate_occ_follow();
+  populateOccFollow();
 
   for (int i = 0; i < nonTerminalCount; i++) {
-    find_followset(i);
+    findFollowset(i);
   }
 }
 
-void find_followset(nonTerminals nt) {
-  if (first_follow_sets[nt].follow_set)
+void findFollowset(nonTerminals nt) {
+  if (firstFollowSets[nt].followSet)
     return;
 
-  first_follow_sets[nt].follow_set = createTerminalList();
+  firstFollowSets[nt].followSet = createTerminalList();
 
-  followDS *followNode = follow_occurrence[nt];
+  followDS *followNode = followOccurrence[nt];
 
   while (followNode) {
     RHSNode *occurence = followNode->occurrence;
@@ -700,69 +700,69 @@ void find_followset(nonTerminals nt) {
 
     if(nextSymbol){
       if(nextSymbol->isT && (nextSymbol->v.t != EPS)){
-        add_terminal_tolist(first_follow_sets[nt].follow_set, nextSymbol->v.t);
+        addTerminalTolist(firstFollowSets[nt].followSet, nextSymbol->v.t);
       }else{
         while(nextSymbol){
           if(!nextSymbol->isT){
-           terminal_list* first_set_of_next = first_follow_sets[nextSymbol->v.non_t].first_set;
-            join_terminallist_exc_eps(first_follow_sets[nt].follow_set, first_set_of_next);
-            if(contains_epsilon(first_set_of_next)){
+           terminalList* firstSetOfNext = firstFollowSets[nextSymbol->v.nonT].firstSet;
+            joinTerminallistExcEps(firstFollowSets[nt].followSet, firstSetOfNext);
+            if(containsEpsilon(firstSetOfNext)){
               nextSymbol = nextSymbol->next;
             }else{
               break;
             }
           }else{
-            add_terminal_tolist(first_follow_sets[nt].follow_set, nextSymbol->v.t);
+            addTerminalTolist(firstFollowSets[nt].followSet, nextSymbol->v.t);
             break;
           }
         }
         if(!nextSymbol){
-          join_terminallist_exc_eps(first_follow_sets[nt].follow_set, first_follow_sets[followNode->parent_nt].follow_set);
+          joinTerminallistExcEps(firstFollowSets[nt].followSet, firstFollowSets[followNode->parentNt].followSet);
         }
       }
     }
     else {
-      join_terminallist_exc_eps(first_follow_sets[nt].follow_set,
-                         first_follow_sets[followNode->parent_nt].follow_set);
+      joinTerminallistExcEps(firstFollowSets[nt].followSet,
+                         firstFollowSets[followNode->parentNt].followSet);
     }
     followNode = followNode->next;
   }
 }
 
-void populate_occ_follow() {
+void populateOccFollow() {
   for (int i = 0; i < nonTerminalCount; i++) {
     LHSNode *lhsNode = G->rules[i];
 
     for (ProductionRule *rule = lhsNode->rules; rule != NULL;
-         rule = rule->next_rule) {
+         rule = rule->nextRule) {
 
       for (RHSNode *rhs = rule->head; rhs != NULL; rhs = rhs->next) {
-        if (!rhs->isT && rhs->v.non_t != lhsNode->lhs) {
+        if (!rhs->isT && rhs->v.nonT != lhsNode->lhs) {
           followDS *newFollow = createFollowDS();
 
           newFollow->occurrence = rhs;
-          newFollow->parent_nt = lhsNode->lhs;
-          newFollow->next = follow_occurrence[rhs->v.non_t];
-          follow_occurrence[rhs->v.non_t] = newFollow;
+          newFollow->parentNt = lhsNode->lhs;
+          newFollow->next = followOccurrence[rhs->v.nonT];
+          followOccurrence[rhs->v.nonT] = newFollow;
         }
       }
     }
   }
 }
 
-void join_terminallist_exc_eps(terminal_list *l1, terminal_list *l2) {
+void joinTerminallistExcEps(terminalList *l1, terminalList *l2) {
   if (l1 == NULL || l2 == NULL || l2->head == NULL) {
     return;
   }
 
-  terminal_node *cur = l2->head;
+  terminalNode *cur = l2->head;
 
   while (cur != NULL) {
     if(cur->t == EPS){
       cur = cur -> next;
       continue;
     }
-    terminal_node *search = l1->head;
+    terminalNode *search = l1->head;
     bool found = false;
 
     while (search != NULL) {
@@ -774,7 +774,7 @@ void join_terminallist_exc_eps(terminal_list *l1, terminal_list *l2) {
     }
 
     if (!found) {
-      terminal_node *newnode = (terminal_node *)malloc(sizeof(terminal_node));
+      terminalNode *newnode = (terminalNode *)malloc(sizeof(terminalNode));
 
       if (newnode == NULL) {
         fprintf(stderr, "memory allocation failed\n");
@@ -787,7 +787,7 @@ void join_terminallist_exc_eps(terminal_list *l1, terminal_list *l2) {
       if (l1->head == NULL) {
         l1->head = newnode;
       } else {
-        terminal_node *last = l1->head;
+        terminalNode *last = l1->head;
         while (last->next != NULL) {
           last = last->next;
         }
@@ -798,7 +798,7 @@ void join_terminallist_exc_eps(terminal_list *l1, terminal_list *l2) {
   }
 }
 
-void create_parse_table() {
+void createParseTable() {
   PT = (ParseTable *)malloc(sizeof(ParseTable));
   if (PT == NULL) {
     printf("Memory allocation failed for parse table.\n");
@@ -816,80 +816,80 @@ void create_parse_table() {
   }
 }
 
-void initiate_parse_table() {
+void initiateParseTable() {
   for (int i = 0; i < nonTerminalCount; i++) {
-    LHSNode *current_lhs = G->rules[i];
-    if (!current_lhs) continue;
+    LHSNode *currentLhs = G->rules[i];
+    if (!currentLhs) continue;
 
-    ProductionRule *current_rule = current_lhs->rules;
+    ProductionRule *currentRule = currentLhs->rules;
 
-    while (current_rule != NULL) {
-      RHSNode *rhs_node = current_rule->head;
-      int nullable_chain = 1; 
+    while (currentRule != NULL) {
+      RHSNode *rhsNode = currentRule->head;
+      int nullableChain = 1; 
 
-      if (rhs_node == NULL) {
-        terminal_node *follow_terminal =
-          first_follow_sets[i].follow_set->head;
+      if (rhsNode == NULL) {
+        terminalNode *followTerminal =
+          firstFollowSets[i].followSet->head;
 
-        while (follow_terminal != NULL) {
-          PT->table[i][follow_terminal->t] = current_rule;
-          follow_terminal = follow_terminal->next;
+        while (followTerminal != NULL) {
+          PT->table[i][followTerminal->t] = currentRule;
+          followTerminal = followTerminal->next;
         }
-        current_rule = current_rule->next_rule;
+        currentRule = currentRule->nextRule;
         continue;
       }
 
-      while (rhs_node != NULL) {
-        if (rhs_node->isT) {
-          if (rhs_node->v.t != EPS) {
-            PT->table[i][rhs_node->v.t] = current_rule;
-            nullable_chain = 0; 
+      while (rhsNode != NULL) {
+        if (rhsNode->isT) {
+          if (rhsNode->v.t != EPS) {
+            PT->table[i][rhsNode->v.t] = currentRule;
+            nullableChain = 0; 
           }
           break;
         } else {
-          terminal_node *first_terminal =
-            first_follow_sets[rhs_node->v.non_t].first_set->head;
+          terminalNode *firstTerminal =
+            firstFollowSets[rhsNode->v.nonT].firstSet->head;
 
-          while (first_terminal != NULL) {
-            if (first_terminal->t != EPS) {
-              PT->table[i][first_terminal->t] = current_rule;
+          while (firstTerminal != NULL) {
+            if (firstTerminal->t != EPS) {
+              PT->table[i][firstTerminal->t] = currentRule;
             }
-            first_terminal = first_terminal->next;
+            firstTerminal = firstTerminal->next;
           }
 
-          if (!contains_epsilon(first_follow_sets[rhs_node->v.non_t].first_set)) {
-            nullable_chain = 0;
-            terminal_node *follow_terminal = first_follow_sets[i].follow_set->head;
-            while (follow_terminal != NULL)
+          if (!containsEpsilon(firstFollowSets[rhsNode->v.nonT].firstSet)) {
+            nullableChain = 0;
+            terminalNode *followTerminal = firstFollowSets[i].followSet->head;
+            while (followTerminal != NULL)
             {
-              PT->isSyn[i][follow_terminal->t] = true;
-              follow_terminal = follow_terminal->next;
+              PT->isSyn[i][followTerminal->t] = true;
+              followTerminal = followTerminal->next;
             }
             break;
           }
-          rhs_node = rhs_node->next;
+          rhsNode = rhsNode->next;
         }
       }
-      if (nullable_chain) {
-        terminal_node *follow_terminal =
-          first_follow_sets[i].follow_set->head;
-        while (follow_terminal != NULL) {
-          PT->table[i][follow_terminal->t] = current_rule;
-          follow_terminal = follow_terminal->next;
+      if (nullableChain) {
+        terminalNode *followTerminal =
+          firstFollowSets[i].followSet->head;
+        while (followTerminal != NULL) {
+          PT->table[i][followTerminal->t] = currentRule;
+          followTerminal = followTerminal->next;
         }
       }
 
-      current_rule = current_rule->next_rule;
+      currentRule = currentRule->nextRule;
     }
   }
 }
 
-int push(int union_val, bool isT){
+int push(int unionVal, bool isT){
   value newValue;
   if(isT){
-    newValue.t = union_val;
+    newValue.t = unionVal;
   }else{
-    newValue.non_t = union_val;
+    newValue.nonT = unionVal;
   }
   StackNode* node = (StackNode*)malloc(sizeof(StackNode));
   if(node == NULL){
@@ -938,9 +938,9 @@ TreeNode* pushListToStack(RHSNode* currNode, StackNode* parent, SymTableItem cur
   newHead->treeNode = newTreeNode;
 
 #ifdef DEBUG
-  printf("Address of newTreeNode %s : %p\n", newTreeNode->isT ? terminalStrings[newTreeNode->v.t] : nonTerminalStrings[newTreeNode->v.non_t], newTreeNode);
-  printf("%s\n", nonTerminalStrings[newTreeNode->parent->v.non_t]);
-  printf("%s\n", newTreeNode->isT ? terminalStrings[newTreeNode->v.t] : nonTerminalStrings[newTreeNode->v.non_t]);
+  printf("Address of newTreeNode %s : %p\n", newTreeNode->isT ? terminalStrings[newTreeNode->v.t] : nonTerminalStrings[newTreeNode->v.nonT], newTreeNode);
+  printf("%s\n", nonTerminalStrings[newTreeNode->parent->v.nonT]);
+  printf("%s\n", newTreeNode->isT ? terminalStrings[newTreeNode->v.t] : nonTerminalStrings[newTreeNode->v.nonT]);
 #endif
   StackNode* prevStackNode = NULL;
   StackNode* currStackNode = newHead;
@@ -962,14 +962,14 @@ TreeNode* pushListToStack(RHSNode* currNode, StackNode* parent, SymTableItem cur
     tempTreeNode->next = NULL;
 
 #ifdef DEBUG
-    // printf("Address of tempTreeNode %s : %p\n", tempTreeNode->isT ? terminalStrings[tempTreeNode->v.t] : nonTerminalStrings[tempTreeNode->v.non_t], tempTreeNode);
-    // printf("%s\n", nonTerminalStrings[newTreeNode->parent->v.non_t]);
-    // printf("%s\n", newTreeNode->isT ? terminalStrings[newTreeNode->v.t] : nonTerminalStrings[newTreeNode->v.non_t]);
+    // printf("Address of tempTreeNode %s : %p\n", tempTreeNode->isT ? terminalStrings[tempTreeNode->v.t] : nonTerminalStrings[tempTreeNode->v.nonT], tempTreeNode);
+    // printf("%s\n", nonTerminalStrings[newTreeNode->parent->v.nonT]);
+    // printf("%s\n", newTreeNode->isT ? terminalStrings[newTreeNode->v.t] : nonTerminalStrings[newTreeNode->v.nonT]);
 #endif
     if (prevStackNode) {
       currStackNode->treeNode->next = tempTreeNode;
 #ifdef DEBUG
-      printf("%s\n", prevStackNode->treeNode->isT ? terminalStrings[prevStackNode->treeNode->v.t] : nonTerminalStrings[prevStackNode->treeNode->v.non_t]);
+      printf("%s\n", prevStackNode->treeNode->isT ? terminalStrings[prevStackNode->treeNode->v.t] : nonTerminalStrings[prevStackNode->treeNode->v.nonT]);
 #endif
     }else{
       newTreeNode->next = tempTreeNode;
@@ -996,7 +996,7 @@ void createParseTree(FILE* fp){
   parseTreeRoot->firstChild = NULL;
   parseTreeRoot->next = NULL;
   parseTreeRoot->isT = false;
-  parseTreeRoot->v.non_t = program;
+  parseTreeRoot->v.nonT = program;
   parseTreeRoot->token = currToken;
   parseTreeRoot->stackNode = mainStack->head;
   mainStack->head->treeNode = parseTreeRoot;
@@ -1030,7 +1030,7 @@ void createParseTree(FILE* fp){
       }
     }else{
       // STACK TOP IS A NON-TERMINAL
-      ProductionRule* pr = PT->table[currNode->v.non_t][currToken.token];
+      ProductionRule* pr = PT->table[currNode->v.nonT][currToken.token];
       if(pr){
         pop();
         RHSNode* temp = pr->head;
@@ -1050,9 +1050,9 @@ void createParseTree(FILE* fp){
         }
       }else{
         // ENTRY IN PARSE TABLE NOT FOUND
-        printf("Line %d Error: Invalid token %s encountered with value %s stack top %s\n", currToken.lineCount, terminalStrings[currToken.token], currToken.lexeme, nonTerminalStrings[currNode->v.non_t]);
+        printf("Line %d Error: Invalid token %s encountered with value %s stack top %s\n", currToken.lineCount, terminalStrings[currToken.token], currToken.lexeme, nonTerminalStrings[currNode->v.nonT]);
         if(currToken.eof == false && mainStack->size > 1){
-          if (!currNode->isT && PT->isSyn[currNode->v.non_t][currToken.token]) {
+          if (!currNode->isT && PT->isSyn[currNode->v.nonT][currToken.token]) {
               pop();
               continue;
           }
@@ -1081,7 +1081,7 @@ void printFirstandFollowSets() {
     printf("--------------------\n");
     printf("(%d) NON-TERMINAL : %s\n", i, nonTerminalStrings[i]);
     printf("First( %s ): ", nonTerminalStrings[i]);
-    terminal_node *first = first_follow_sets[i].first_set->head;
+    terminalNode *first = firstFollowSets[i].firstSet->head;
     printf("{");
     count = 0;
     while (first != NULL) {
@@ -1092,7 +1092,7 @@ void printFirstandFollowSets() {
     printf("} count = %d\n", count);
 
     printf("Follow( %s ): ", nonTerminalStrings[i]);
-    terminal_node *follow = first_follow_sets[i].follow_set->head;
+    terminalNode *follow = firstFollowSets[i].followSet->head;
     printf("{");
     count = 0;
     while (follow != NULL) {
@@ -1111,7 +1111,7 @@ void printStack() {
     if (temp->isT) {
       printf("Terminal: %s\n", terminalStrings[temp->v.t]);
     } else {
-      printf("Non-terminal: %s\n", nonTerminalStrings[temp->v.non_t]);
+      printf("Non-terminal: %s\n", nonTerminalStrings[temp->v.nonT]);
     }
     temp = temp->next;
   }
@@ -1126,22 +1126,22 @@ void dfsHelper(TreeNode* currTreeNode, FILE* output){
   dfsHelper(firstChild, output);
   if(currTreeNode->isT){
     if(strcmp(terminalStrings[currTreeNode->v.t], "EPS") == 0){
-      fprintf(output, "|%-25s|%-25s|%-25s|%-25s|%-25s|%-25s|%-25s|\n", "----", "NO_LINE", terminalStrings[currTreeNode->v.t], "NO_VAL", nonTerminalStrings[currTreeNode->parent->v.non_t], "YES", "----");
+      fprintf(output, "|%-25s|%-25s|%-25s|%-25s|%-25s|%-25s|%-25s|\n", "----", "NO_LINE", terminalStrings[currTreeNode->v.t], "NO_VAL", nonTerminalStrings[currTreeNode->parent->v.nonT], "YES", "----");
     }
     else if (currTreeNode->token.token == TK_NUM) {
-      fprintf(output, "|%-25s|%-25d|%-25s|%-25d|%-25s|%-25s|%-25s|\n", currTreeNode->token.lexeme, currTreeNode->token.lineCount, terminalStrings[currTreeNode->v.t], currTreeNode->token.intVal, nonTerminalStrings[currTreeNode->parent->v.non_t], "YES", "----");
+      fprintf(output, "|%-25s|%-25d|%-25s|%-25d|%-25s|%-25s|%-25s|\n", currTreeNode->token.lexeme, currTreeNode->token.lineCount, terminalStrings[currTreeNode->v.t], currTreeNode->token.intVal, nonTerminalStrings[currTreeNode->parent->v.nonT], "YES", "----");
     } 
     else if (currTreeNode->token.token == TK_RNUM){
-      fprintf(output, "|%-25s|%-25d|%-25s|%-25.2f|%-25s|%-25s|%-25s|\n", currTreeNode->token.lexeme, currTreeNode->token.lineCount, terminalStrings[currTreeNode->v.t], currTreeNode->token.realVal, nonTerminalStrings[currTreeNode->parent->v.non_t], "YES", "----");
+      fprintf(output, "|%-25s|%-25d|%-25s|%-25.2f|%-25s|%-25s|%-25s|\n", currTreeNode->token.lexeme, currTreeNode->token.lineCount, terminalStrings[currTreeNode->v.t], currTreeNode->token.realVal, nonTerminalStrings[currTreeNode->parent->v.nonT], "YES", "----");
     }
     else{
-      fprintf(output, "|%-25s|%-25d|%-25s|%-25s|%-25s|%-25s|%-25s|\n", currTreeNode->token.lexeme, currTreeNode->token.lineCount, terminalStrings[currTreeNode->v.t], "NO_VAL", nonTerminalStrings[currTreeNode->parent->v.non_t], "YES", "----");
+      fprintf(output, "|%-25s|%-25d|%-25s|%-25s|%-25s|%-25s|%-25s|\n", currTreeNode->token.lexeme, currTreeNode->token.lineCount, terminalStrings[currTreeNode->v.t], "NO_VAL", nonTerminalStrings[currTreeNode->parent->v.nonT], "YES", "----");
     }
   }
-  else if (currTreeNode->v.non_t == program){
-    fprintf(output, "|%-25s|%-25s|%-25s|%-25s|%-25s|%-25s|%-25s|\n", "----", "NO_LINE", "----", "NO_VAL", "ROOT", "NO", nonTerminalStrings[currTreeNode->v.non_t]);
+  else if (currTreeNode->v.nonT == program){
+    fprintf(output, "|%-25s|%-25s|%-25s|%-25s|%-25s|%-25s|%-25s|\n", "----", "NO_LINE", "----", "NO_VAL", "ROOT", "NO", nonTerminalStrings[currTreeNode->v.nonT]);
   }else{
-    fprintf(output, "|%-25s|%-25s|%-25s|%-25s|%-25s|%-25s|%-25s|\n", "----", "NO_LINE", "----", "NO_VAL", nonTerminalStrings[currTreeNode->parent->v.non_t], "NO", nonTerminalStrings[currTreeNode->v.non_t]);
+    fprintf(output, "|%-25s|%-25s|%-25s|%-25s|%-25s|%-25s|%-25s|\n", "----", "NO_LINE", "----", "NO_VAL", nonTerminalStrings[currTreeNode->parent->v.nonT], "NO", nonTerminalStrings[currTreeNode->v.nonT]);
   }
   fprintf(output, "|");
   for (int i = 0; i < 181; ++i) {
@@ -1162,7 +1162,7 @@ void printTreeHelper(TreeNode* currTreeNode){
   if(currTreeNode->isT){
     printf("Terminal: %s\n", terminalStrings[currTreeNode->v.t]);
   }else{
-    printf("Non-terminal: %s\n\n", nonTerminalStrings[currTreeNode->v.non_t]);
+    printf("Non-terminal: %s\n\n", nonTerminalStrings[currTreeNode->v.nonT]);
   }
   TreeNode* firstChild = currTreeNode->firstChild;
   while(firstChild){
@@ -1194,7 +1194,7 @@ void printProductionRule(int nonTerminalIdx, ProductionRule *prodRule) {
     if (currentRHS->isT) {
       printf("%s ", terminalStrings[currentRHS->v.t]);
     } else {
-      printf("<%s> ", nonTerminalStrings[currentRHS->v.non_t]);
+      printf("<%s> ", nonTerminalStrings[currentRHS->v.nonT]);
     }
     currentRHS = currentRHS->next;
   }
@@ -1208,11 +1208,11 @@ void printAllProductionRules(int nonTerminalIdx) {
   {
     printProductionRule(nonTerminalIdx, rule);
     printf("\n");
-    rule = rule->next_rule;
+    rule = rule->nextRule;
   }
 }
 
-void print_parse_table() {
+void printParseTable() {
   printf("Non-terminals/Terminals,");
   for (int j = 0; j < terminalCount; j++) {
     printf("%s,", terminalStrings[j]);
@@ -1253,11 +1253,11 @@ void print_parse_table() {
 //   cleanUpDfs(parseTreeRoot);
 //   free(mainStack);
 //   for (int i = 0; i < nonTerminalCount; i++) {
-//     free(first_follow_sets[i].first_set);
-//     free(first_follow_sets[i].follow_set);
+//     free(firstFollowSets[i].firstSet);
+//     free(firstFollowSets[i].followSet);
 //   }
-//   free(first_follow_sets);
-//   free(follow_occurrence);
+//   free(firstFollowSets);
+//   free(followOccurrence);
 //   free(PT);
 //   free(G);
 // }

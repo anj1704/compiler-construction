@@ -25,14 +25,14 @@ typedef enum {
     stmt,
 
     // Parameters and Declarations
-    parameter_list,
-    input_par,
-    output_par,
+    parameterList,
+    inputPar,
+    outputPar,
     inputParameters,
     outputParameters,
     declarations,
     declaration,
-    global_or_not,
+    globalOrNot,
 
     // Data Types and Type Definitions
     dataType,
@@ -76,13 +76,13 @@ typedef enum {
     // Identifiers and Variables
     var,
     idList,
-    more_ids,
+    moreIds,
     singleOrRecId,
-    option_single_constructed,
+    optionSingleConstructed,
 
     // Miscellaneous
     A,
-    remaining_list,
+    remainingList,
     oneExpansion,
     moreExpansions
 } nonTerminals;

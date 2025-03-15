@@ -18,8 +18,8 @@ char* terminalStrings[] = {
 
 char* nonTerminalStrings[] = {
     "program", "mainFunction", "otherFunctions", "function", "stmts", "otherStmts", "stmt",
-    "parameter_list", "input_par", "output_par", "inputParameters", "outputParameters",
-    "declarations", "declaration", "global_or_not",
+    "parameterList", "inputPar", "outputPar", "inputParameters", "outputParameters",
+    "declarations", "declaration", "globalOrNot",
     "dataType", "primitiveDatatype", "constructedDatatype", "typeDefinitions", "typeDefinition",
     "definetypestmt", "actualOrRedefined",
     "fieldDefinitions", "fieldDefinition", "fieldtype", "moreFields",
@@ -27,8 +27,8 @@ char* nonTerminalStrings[] = {
     "returnStmt", "optionalReturn", "elsePart",
     "arithmeticExpression", "expPrime", "term", "termPrime", "factor", "booleanExpression",
     "highPrecedenceOperators", "lowPrecedenceOperators", "logicalOp", "relationalOp",
-    "var", "idList", "more_ids", "singleOrRecId", "option_single_constructed",
-    "A", "remaining_list", "oneExpansion", "moreExpansions"
+    "var", "idList", "moreIds", "singleOrRecId", "optionSingleConstructed",
+    "A", "remainingList", "oneExpansion", "moreExpansions"
 };
 
 // Lexer global variables
@@ -44,16 +44,16 @@ bool loadBufferTwo = true;
 twinBuffer tBuff;
 
 // Parser global variables
-followDS *follow_occurrence[nonTerminalCount];
+followDS *followOccurrence[nonTerminalCount];
 Grammar *G;
-non_terminal_sets first_follow_sets[nonTerminalCount];
+nonTerminalSets firstFollowSets[nonTerminalCount];
 ParseTable *PT;
 gitems **itemList;
 Stack* mainStack;
 TreeNode* parseTreeRoot;
 
 void Usage() {
-  fprintf(stderr, "Usage: ./compiler <source_file> <output_file>\n");
+  fprintf(stderr, "Usage: ./compiler <sourceFile> <outputFile>\n");
 }
 
 int main(int argc, char *argv[]) {
@@ -68,12 +68,12 @@ int main(int argc, char *argv[]) {
   parseTreeRoot = (TreeNode*)malloc(sizeof(TreeNode));
   addGrammarRules();
   printf("Grammar rules added\n");
-  compute_firsts();
+  computeFirsts();
   printf("Computed first sets\n");
-  compute_follow();
+  computeFollow();
   printf("Computed follow\n");
-  create_parse_table();
-  initiate_parse_table();
+  createParseTable();
+  initiateParseTable();
   printf("Created and filled parse table\n");
 
   char *sourceFile = argv[1];
