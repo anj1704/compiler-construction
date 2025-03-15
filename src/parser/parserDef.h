@@ -2,37 +2,30 @@
 #define PARSER_DEF
 #include "../lexer/lexer.h"
 
-// First follow sets
+/* Node with terminal value */
 typedef struct terminalNode {
   terminals t;
   struct terminalNode *next;
 } terminalNode;
 
+/* List of terminal nodes */
 typedef struct terminalList {
   terminalNode *head;
 } terminalList;
 
+/* First and follow set for a given non-terminal */
 typedef struct nonTerminalSets {
   terminalList *firstSet;
   terminalList *followSet;
 } nonTerminalSets;
 
-// Nodes of Grammar Non-Terminals
+/* Value of token - terminal or non-terminal */
 typedef union u {
   terminals t;        // Terminal value
-  nonTerminals nonT; // Non-terminal value
+  nonTerminals nonT;  // Non-terminal value
 } value;
 
-// parse tree
-/*typedef struct treeNode {*/
-/*  struct treeNode *parent;*/
-/*  struct treeNode *firstChild;*/
-/*  struct treeNode *rightSibling;*/
-/*  SymTableItem *tokenPtr; // Pointer to the token associated with the node*/
-/*  bool isT;*/
-/*  value v;*/
-/*} treeNode;*/
-
+/* Parse tree node */
 typedef struct treeNode{
   struct treeNode *parent;
   struct treeNode *firstChild;
@@ -44,57 +37,50 @@ typedef struct treeNode{
   SymTableItem token;
 } TreeNode;
 
+/* Node for a element in RHS of production rule */
 typedef struct rhsNode {
-  bool isT; // Indicates whether it's a terminal or non-terminal
+  bool isT; 
   value v;
-  struct rhsNode *next; // Pointer to the next node in the list
+  struct rhsNode *next; 
 } RHSNode;
 
-// A linked list containing a production rule
+/* Linked list of a production rule */
 typedef struct productionRule {
-  RHSNode *head;                     // Pointer to the head of the list
-  struct productionRule *nextRule; // Pointer to the next production rule
+  RHSNode *head;                   
+  struct productionRule *nextRule; 
 } ProductionRule;
 
-// Node for RHS of production rule
+/* Node for a element in LHS of production rule which starts with non-terminal lhs */
 typedef struct lhsNode {
-  ProductionRule *rules; // Pointer to linked list of production rules
-  nonTerminals lhs;      // LHS non-terminal value
+  ProductionRule *rules; 
+  nonTerminals lhs;      
 } LHSNode;
 
+/* An item in a grammar rule - terminal or non-terminal */
+typedef struct {
+  bool isTer; 
+  value v;
+} gitems;
+
+/* Grammar - list of all production rules */
 typedef struct grammar {
   LHSNode *rules[nonTerminalCount];
 } Grammar;
 
+/* Parse Table */
 typedef struct parseTable {
   ProductionRule *table[nonTerminalCount][terminalCount];
   bool isSyn[nonTerminalCount][terminalCount];
 } ParseTable;
 
-// stack for maintaining non-terminals
-/*typedef struct stack {*/
-/*  LHSNode *top;*/
-/*  int size;*/
-/*} helperStack;*/
-
-// follow for non-terminals initialized
+/* Data structure to compute follow sets */
 typedef struct follow {
   RHSNode *occurrence;
   nonTerminals parentNt;
-  struct follow *next; // Pointer to the next follow struct
+  struct follow *next; 
 } followDS;
 
-typedef struct {
-  bool isTer; // Flag indicating if it's a terminal or not
-  value v;
-} gitems;
-
-/*typedef struct StackNode {*/
-/*  bool isT;*/
-/*  value value;*/
-/*  struct StackNode *next;*/
-/*} StackNode;*/
-
+/* Node of parsing stack */
 typedef struct StackNode {
   bool isT;
   value v;
@@ -102,6 +88,7 @@ typedef struct StackNode {
   struct treeNode *treeNode;
 } StackNode;
 
+/* Stack */
 typedef struct Stack {
   int size;
   StackNode* head;

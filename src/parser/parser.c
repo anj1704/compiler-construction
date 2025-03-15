@@ -1,5 +1,4 @@
 #include "parser.h"
-#include "parserDef.h"
 
 extern char *terminalStrings[];
 extern char *nonTerminalStrings[];
@@ -124,7 +123,6 @@ void initialiseParseTreeRoot() {
 void cleanTreeNode(TreeNode *node) {
   if (node == NULL)
     return;
-  /*printf("%s started\n", (node->isT) ? terminalStrings[node->v.t] : nonTerminalStrings[node->v.nonT]);*/
 
   if (node->firstChild != NULL)
     cleanTreeNode(node->firstChild);
@@ -138,11 +136,10 @@ void cleanTreeNode(TreeNode *node) {
   if (node->SymTableItem != NULL)
     free(node->SymTableItem);
 
-  /*printf("%s ended\n", (node->isT) ? terminalStrings[node->v.t] : nonTerminalStrings[node->v.nonT]);*/
 
   if (node != NULL)
     free(node);
-  /*printf("%s 3\n", (node->isT) ? terminalStrings[node->v.t] : nonTerminalStrings[node->v.nonT]);*/
+
   node = NULL;
 }
 
@@ -154,12 +151,14 @@ void addrule(nonTerminals nt, int size, gitems value[]) {
   } else {
     lhsNode = G->rules[nt];
   }
+
   ProductionRule *currentrulehead = lhsNode->rules;
   ProductionRule *newRule = createProductionRule();
   RHSNode *rhshead = createRHSNode();
   RHSNode *rhstail = rhshead;
   rhshead->v = value[0].v;
   rhshead->isT = value[0].isTer;
+
   for (int i = 1; i < size; i++) {
     RHSNode *rhsNode = createRHSNode();
     rhsNode->v = value[i].v;
@@ -167,6 +166,7 @@ void addrule(nonTerminals nt, int size, gitems value[]) {
     rhstail->next = rhsNode;
     rhstail = rhstail->next;
   }
+
   newRule->head = rhshead;
   if (currentrulehead == NULL) {
     currentrulehead = newRule;
@@ -174,6 +174,7 @@ void addrule(nonTerminals nt, int size, gitems value[]) {
     G->rules[nt] = lhsNode;
     return;
   }
+
   if (currentrulehead->nextRule != NULL) {
     while (currentrulehead->nextRule != NULL)
       currentrulehead = currentrulehead->nextRule;
@@ -184,6 +185,7 @@ void addrule(nonTerminals nt, int size, gitems value[]) {
   G->rules[nt] = lhsNode;
 }
 
+// Each gitem corresponds to one rule, which is then added
 void addGrammarRules() {
   gitems i1[2] = {{false, {.nonT = otherFunctions}},
                   {false, {.nonT = mainFunction}}};
@@ -585,6 +587,7 @@ void computeFirst(nonTerminals givenNt) {
   for (ProductionRule *rule = lhs->rules; rule != NULL;
        rule = rule->nextRule) {
     for (RHSNode *rhs = rule->head; rhs != NULL; rhs = rhs->next) {
+      // if terminal, add to first set and break
       if (rhs->isT) {
 #ifdef DEBUG
         printf("terminal: %s\n", terminalStrings[rhs->v.t]);
@@ -595,11 +598,12 @@ void computeFirst(nonTerminals givenNt) {
 #ifdef DEBUG
         printf("non terminal: %s\n", nonTerminalStrings[rhs->v.nonT]);
 #endif
+        // if non-terminal and not epsilon, add first of non-terminal to first
         computeFirst(rhs->v.nonT);
         joinTerminalList(firstFollowSets[givenNt].firstSet,
                            firstFollowSets[rhs->v.nonT].firstSet, true);
 
-        // Made change to check if all non-terminals contain an EChanged
+        // if non-terminal and epsilon, only add the epsilon if you reach end of rule
         if (containsEpsilon(firstFollowSets[rhs->v.nonT].firstSet) && (rhs->next != NULL)) {
           removeEpsilon(firstFollowSets[givenNt].firstSet);
         } else
@@ -735,7 +739,8 @@ void computeFollow() {
 
   addTerminalTolist(firstFollowSets[program].followSet, END_OF_INPUT);
 
-  populateOccFollow();
+  // find all occurence of non terminals in the RHS of rules and store them for easy access
+  findAllOccurences();
 
   for (int i = 0; i < nonTerminalCount; i++) {
     findFollowset(i);
@@ -755,19 +760,23 @@ void findFollowset(nonTerminals nt) {
     RHSNode *nextSymbol = occurence->next;
 
     if(nextSymbol){
+      // if occurence is followed by a terminal, add that terminal to follow set
       if(nextSymbol->isT && (nextSymbol->v.t != EPS)){
         addTerminalTolist(firstFollowSets[nt].followSet, nextSymbol->v.t);
       }else{
         while(nextSymbol){
           if(!nextSymbol->isT){
            terminalList* firstSetOfNext = firstFollowSets[nextSymbol->v.nonT].firstSet;
+           // add first set of next symbol to follow set
             joinTerminalList(firstFollowSets[nt].followSet, firstSetOfNext, false);
+            // if first set contains epsilon, move to next symbol
             if(containsEpsilon(firstSetOfNext)){
               nextSymbol = nextSymbol->next;
             }else{
               break;
             }
           }else{
+            // add the follow set of parent if final term in rule contains epsilon in first set
             addTerminalTolist(firstFollowSets[nt].followSet, nextSymbol->v.t);
             break;
           }
@@ -778,6 +787,7 @@ void findFollowset(nonTerminals nt) {
       }
     }
     else {
+      // add the follow set of parent 
       joinTerminalList(firstFollowSets[nt].followSet,
                          firstFollowSets[followNode->parentNt].followSet, false);
     }
@@ -785,7 +795,7 @@ void findFollowset(nonTerminals nt) {
   }
 }
 
-void populateOccFollow() {
+void findAllOccurences() {
   for (int i = 0; i < nonTerminalCount; i++) {
     LHSNode *lhsNode = G->rules[i];
 
@@ -817,6 +827,7 @@ void createParseTable() {
     for (int j = 0; j < terminalCount; j++) {
       PT->table[i][j] = NULL;
       PT->isSyn[i][j] = false;
+      // adding synchronization tokens
       if (j == TK_SEM || j == TK_END || j == TK_ENDIF || j == TK_ENDRECORD || j == TK_ENDUNION || j == TK_ENDWHILE || j == TK_ELSE || j == TK_SQR || j == TK_CL) {
         PT->isSyn[i][j] = true;
       }
@@ -920,7 +931,6 @@ int pop(){
   if(!(mainStack->head)) return 0; // stack should not be empty
   StackNode* temp = mainStack->head;
   mainStack->head = temp->next;
-  /*free(temp);*/
   --(mainStack->size);
   return 1;
 }

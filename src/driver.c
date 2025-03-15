@@ -1,6 +1,7 @@
 #include "lexer/lexer.h"
 #include "parser/parser.h"
 #include <time.h>
+
 char* terminalStrings[] = {
     "TK_PLUS", "TK_MINUS", "TK_MUL", "TK_DIV",
     "TK_GT", "TK_LT", "TK_EQ", "TK_NE", "TK_LE", "TK_GE",
