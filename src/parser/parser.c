@@ -1,7 +1,5 @@
 #include "parser.h"
 #include "parserDef.h"
-#include <stdio.h>
-#include <stdlib.h>
 
 extern char *terminalStrings[];
 extern char *nonTerminalStrings[];
@@ -599,7 +597,7 @@ void computeFirst(nonTerminals givenNt) {
 #endif
         computeFirst(rhs->v.nonT);
         joinTerminalList(firstFollowSets[givenNt].firstSet,
-                           firstFollowSets[rhs->v.nonT].firstSet);
+                           firstFollowSets[rhs->v.nonT].firstSet, true);
 
         // Made change to check if all non-terminals contain an EChanged
         if (containsEpsilon(firstFollowSets[rhs->v.nonT].firstSet) && (rhs->next != NULL)) {
@@ -648,7 +646,7 @@ void addTerminalTolist(terminalList *list, terminals t) {
   }
 }
 
-void joinTerminalList(terminalList *l1, terminalList *l2) {
+void joinTerminalList(terminalList *l1, terminalList *l2, bool includeEps) {
   if (l1 == NULL || l2 == NULL || l2->head == NULL) {
     return;
   }
@@ -656,6 +654,10 @@ void joinTerminalList(terminalList *l1, terminalList *l2) {
   terminalNode *cur = l2->head;
 
   while (cur != NULL) {
+    if (!includeEps && cur->t == EPS){
+      cur = cur -> next;
+      continue;
+    }
     terminalNode *search = l1->head;
     bool found = false;
 
@@ -759,7 +761,7 @@ void findFollowset(nonTerminals nt) {
         while(nextSymbol){
           if(!nextSymbol->isT){
            terminalList* firstSetOfNext = firstFollowSets[nextSymbol->v.nonT].firstSet;
-            joinTerminallistExcEps(firstFollowSets[nt].followSet, firstSetOfNext);
+            joinTerminalList(firstFollowSets[nt].followSet, firstSetOfNext, false);
             if(containsEpsilon(firstSetOfNext)){
               nextSymbol = nextSymbol->next;
             }else{
@@ -771,13 +773,13 @@ void findFollowset(nonTerminals nt) {
           }
         }
         if(!nextSymbol){
-          joinTerminallistExcEps(firstFollowSets[nt].followSet, firstFollowSets[followNode->parentNt].followSet);
+          joinTerminalList(firstFollowSets[nt].followSet, firstFollowSets[followNode->parentNt].followSet, false);
         }
       }
     }
     else {
-      joinTerminallistExcEps(firstFollowSets[nt].followSet,
-                         firstFollowSets[followNode->parentNt].followSet);
+      joinTerminalList(firstFollowSets[nt].followSet,
+                         firstFollowSets[followNode->parentNt].followSet, false);
     }
     followNode = followNode->next;
   }
@@ -801,54 +803,6 @@ void populateOccFollow() {
         }
       }
     }
-  }
-}
-
-void joinTerminallistExcEps(terminalList *l1, terminalList *l2) {
-  if (l1 == NULL || l2 == NULL || l2->head == NULL) {
-    return;
-  }
-
-  terminalNode *cur = l2->head;
-
-  while (cur != NULL) {
-    if(cur->t == EPS){
-      cur = cur -> next;
-      continue;
-    }
-    terminalNode *search = l1->head;
-    bool found = false;
-
-    while (search != NULL) {
-      if (search->t == cur->t) {
-        found = true;
-        break;
-      }
-      search = search->next;
-    }
-
-    if (!found) {
-      terminalNode *newnode = (terminalNode *)malloc(sizeof(terminalNode));
-
-      if (newnode == NULL) {
-        fprintf(stderr, "memory allocation failed\n");
-        exit(EXIT_FAILURE);
-      }
-
-      newnode->t = cur->t;
-      newnode->next = NULL;
-
-      if (l1->head == NULL) {
-        l1->head = newnode;
-      } else {
-        terminalNode *last = l1->head;
-        while (last->next != NULL) {
-          last = last->next;
-        }
-        last->next = newnode;
-      }
-    }
-    cur = cur->next;
   }
 }
 

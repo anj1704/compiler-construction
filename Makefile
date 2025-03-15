@@ -4,6 +4,7 @@ SRCS        = src/lexer/lexer.c src/parser/parser.c src/driver.c
 EXE         = stage1exe
 DEBUG_EXE   = compiler_debug
 
+.SILENT:
 .PHONY: all clean run debug
 
 all: $(EXE)
