@@ -194,4 +194,15 @@ SymTableItem getToken(FILE *fp);
  * Output: None
  */
 void cleanTable();
+
+/* 
+ * Function: retract
+ * --------------------
+ * Moves endPtr back by 1. Wraps around the buffers if underflow is detected.
+ *
+ * Input: None
+ *
+ * Output: None
+ */
+void retract();
 #endif

@@ -1,8 +1,4 @@
 #include "lexer.h"
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 extern char * terminalStrings[];
 extern char * nonTerminalsStrings[];
@@ -235,6 +231,15 @@ SymTableItem errorHelper(int error, char *lex, int line) {
   return nextSymbolItem;
 }
 
+char *allocateLexeme(const int lengthLexeme) {
+  char *lexeme = (char *)malloc((lengthLexeme + 1) * sizeof(char));
+  if (!lexeme) {
+    fprintf(stderr, "Mem allocation failed for lexeme");
+    exit(EXIT_FAILURE);
+  }
+  return lexeme;
+}
+
 char *getLexeme() {
   int lengthLexeme;
   char *lexeme;
@@ -245,6 +250,8 @@ char *getLexeme() {
       (endPtr >= tBuff.bufferOne && endPtr <= tBuff.bufferOne + BUFFER_SIZE)) {
 
     lengthLexeme = endPtr - startPtr;
+    lexeme = allocateLexeme(lengthLexeme);
+    strncpy(lexeme, startPtr, lengthLexeme);
   }
   // Length of lexeme if in buffer two only
   else if ((startPtr >= tBuff.bufferTwo &&
@@ -253,40 +260,29 @@ char *getLexeme() {
             endPtr <= tBuff.bufferTwo + BUFFER_SIZE)) {
 
     lengthLexeme = endPtr - startPtr;
+    lexeme = allocateLexeme(lengthLexeme);
+    strncpy(lexeme, startPtr, lengthLexeme);
   } 
   // Length of lexeme if in both buffers
   else {
     lengthLexeme =
-        tBuff.bufferOne + BUFFER_SIZE - startPtr + endPtr - tBuff.bufferTwo;
+      tBuff.bufferOne + BUFFER_SIZE - startPtr + endPtr - tBuff.bufferTwo;
+    if (lengthLexeme >= 0) {
+      lexeme = allocateLexeme(lengthLexeme);
+      int firstPartLength = tBuff.bufferOne + BUFFER_SIZE - startPtr;
+      strncpy(lexeme, startPtr, firstPartLength);
+      strncpy(lexeme + firstPartLength, tBuff.bufferTwo,
+              lengthLexeme - firstPartLength);
+    } else {
+      lengthLexeme =
+        tBuff.bufferTwo + BUFFER_SIZE - startPtr + endPtr - tBuff.bufferOne;
+      lexeme = allocateLexeme(lengthLexeme);
+      int firstPartLength = tBuff.bufferTwo + BUFFER_SIZE - startPtr;
+      strncpy(lexeme, startPtr, firstPartLength);
+      strncpy(lexeme + firstPartLength, tBuff.bufferOne,
+              lengthLexeme - firstPartLength);
+    }
   }
-
-  lexeme = (char *)malloc((lengthLexeme + 1) * sizeof(char));
-  if (!lexeme) {
-    fprintf(stderr, "Mem allocation failed");
-    exit(EXIT_FAILURE);
-  }
-
-  if ((startPtr >= tBuff.bufferOne &&
-       startPtr < tBuff.bufferOne + BUFFER_SIZE) &&
-      (endPtr >= tBuff.bufferOne && endPtr <= tBuff.bufferOne + BUFFER_SIZE)) {
-
-    strncpy(lexeme, startPtr, lengthLexeme);
-  }
-
-  else if ((startPtr >= tBuff.bufferTwo &&
-            startPtr < tBuff.bufferTwo + BUFFER_SIZE) &&
-           (endPtr >= tBuff.bufferTwo &&
-            endPtr <= tBuff.bufferTwo + BUFFER_SIZE)) {
-    strncpy(lexeme, startPtr, lengthLexeme);
-
-  } else {
-
-    int firstPartLength = tBuff.bufferOne + BUFFER_SIZE - startPtr;
-    strncpy(lexeme, startPtr, firstPartLength);
-    strncpy(lexeme + firstPartLength, tBuff.bufferTwo,
-            lengthLexeme - firstPartLength);
-  }
-
   // Null terminate the lexeme
   lexeme[lengthLexeme] = '\0';
 
@@ -515,7 +511,7 @@ SymTableItem getToken(FILE *fp) {
         dfastate = 5;
       } else {
         dfastate = -5;
-        endPtr--;
+        retract();
       }
       break;
 
@@ -525,8 +521,8 @@ SymTableItem getToken(FILE *fp) {
 
     case 6:
       // Double retraction
-      endPtr--;
-      endPtr--;
+      retract();
+      retract();
       return tokenize(getLexeme(), TK_LT, lineCount);
       break;
 
@@ -536,7 +532,7 @@ SymTableItem getToken(FILE *fp) {
 
     case 8:
       // Single Retraction
-      endPtr--;
+      retract();
       return tokenize(getLexeme(), TK_LT, lineCount);
       break;
 
@@ -550,7 +546,7 @@ SymTableItem getToken(FILE *fp) {
       break;
 
     case 10:
-      endPtr--;
+      retract();
       SymTableItem *t = lookup(getLexeme());
       if (t) {
         return tokenize(getLexeme(), t->token, lineCount);
@@ -590,7 +586,7 @@ SymTableItem getToken(FILE *fp) {
       break;
 
     case 14:
-      endPtr--;
+      retract();
       lexeme = getLexeme();
 #ifdef DEBUG
       printf("Lexeme extracted: %s\n", lexeme); // Debug print
@@ -658,7 +654,7 @@ SymTableItem getToken(FILE *fp) {
         dfastate = 29;
       } else {
         dfastate = -5;
-        endPtr--;     
+        retract();     
       }
       break;
 
@@ -672,7 +668,7 @@ SymTableItem getToken(FILE *fp) {
         dfastate = 31;
       } else {
         dfastate = -5; 
-        endPtr--;     
+        retract();     
       }
       break;
 
@@ -694,7 +690,7 @@ SymTableItem getToken(FILE *fp) {
       break;
 
     case 34:
-      endPtr--;
+      retract();
       return tokenize(getLexeme(), TK_GT, lineCount);
       break;
 
@@ -704,7 +700,7 @@ SymTableItem getToken(FILE *fp) {
         dfastate = 36;
       } else {
         dfastate = -5; 
-        endPtr--;
+        retract();
       }
       break;
 
@@ -714,7 +710,7 @@ SymTableItem getToken(FILE *fp) {
         dfastate = 37;
       } else {
         dfastate = -5; 
-        endPtr--;
+        retract();
       }
       break;
 
@@ -728,7 +724,7 @@ SymTableItem getToken(FILE *fp) {
         dfastate = 39;
       } else {
         dfastate = -5; 
-        endPtr--;
+        retract();
       }
       break;
 
@@ -738,7 +734,7 @@ SymTableItem getToken(FILE *fp) {
         dfastate = 40;
       } else {
         dfastate = -5; 
-        endPtr--;
+        retract();
       }
       break;
 
@@ -757,7 +753,7 @@ SymTableItem getToken(FILE *fp) {
       break;
 
     case 42:
-      endPtr--;
+      retract();
       ch = getNextCharacter(fp);
       dfastate = 1;
       break;
@@ -778,7 +774,7 @@ SymTableItem getToken(FILE *fp) {
         dfastate = 46;
       } else {
         dfastate = -5;
-        endPtr--; 
+        retract(); 
       }
       break;
 
@@ -803,7 +799,7 @@ SymTableItem getToken(FILE *fp) {
       break;
 
     case 48:
-      endPtr--;
+      retract();
       lexeme = getLexeme();
 #ifdef DEBUG
       printf("Lexeme extracted: %s\n", lexeme); // Debug print
@@ -829,7 +825,7 @@ SymTableItem getToken(FILE *fp) {
         dfastate = 50;
       } else {
         dfastate = -5;
-        endPtr--; 
+        retract(); 
       }
       break;
 
@@ -843,7 +839,7 @@ SymTableItem getToken(FILE *fp) {
       break;
 
     case 51:
-      endPtr--;
+      retract();
       lexeme = getLexeme();
 #ifdef DEBUG
       printf("Lexeme extracted: %s\n", lexeme); // Debug print
@@ -879,7 +875,7 @@ SymTableItem getToken(FILE *fp) {
         dfastate = 55;
       } else {
         dfastate = -5;
-        endPtr--;
+        retract();
       }
       break;
 
@@ -900,7 +896,7 @@ SymTableItem getToken(FILE *fp) {
         dfastate = 60;
       } else {
         dfastate = -5;
-        endPtr--; 
+        retract(); 
       }
       break;
 
@@ -910,7 +906,7 @@ SymTableItem getToken(FILE *fp) {
         dfastate = 60;
       } else {
         dfastate = -5;
-        endPtr--; 
+        retract(); 
       }
       break;
     case 58:
@@ -918,7 +914,7 @@ SymTableItem getToken(FILE *fp) {
       return tokenize(getLexeme(), TK_NUM, lineCount);
 
     case 59:
-      endPtr--;
+      retract();
       return tokenize(getLexeme(), TK_RNUM, lineCount);
 
     case 60:
@@ -927,12 +923,12 @@ SymTableItem getToken(FILE *fp) {
         dfastate = 62;
       } else {
         dfastate = -5;
-        endPtr--; 
+        retract(); 
       }
       break;
 
     case 61:
-      endPtr--;
+      retract();
       return tokenize(getLexeme(), TK_NUM, lineCount);
 
     case 62:
@@ -979,4 +975,11 @@ void cleanTable() {
   }
   free(table);
   table = NULL;
+}
+
+void retract() {
+  if (endPtr == tBuff.bufferOne)
+    endPtr = tBuff.bufferTwo + BUFFER_SIZE - 1;
+  else
+    --endPtr;
 }

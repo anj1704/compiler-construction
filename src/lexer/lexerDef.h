@@ -12,7 +12,7 @@
 #define terminalCount 60 
 #define nonTerminalCount 53
 
-#define BUFFER_SIZE (1<<20) // check size of buffer
+#define BUFFER_SIZE 50
 
 typedef enum {
     // Program Structure
