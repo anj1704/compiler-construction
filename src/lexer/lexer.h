@@ -196,6 +196,17 @@ SymTableItem getToken(FILE *fp);
 void cleanTable();
 
 /* 
+ * Function: cleanKeywords
+ * --------------------
+ * Frees memory allocated for the keywords
+ *
+ * Input: None
+ *
+ * Output: None
+ */
+void cleanKeywords();
+
+/* 
  * Function: retract
  * --------------------
  * Moves endPtr back by 1. Wraps around the buffers if underflow is detected.

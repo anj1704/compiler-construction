@@ -190,6 +190,7 @@ void findFollowset(nonTerminals nt);
  * Output: None
  */
 void createParseTable();
+
 /*
  * Function: initiateParseTable
  * ----------------------------
@@ -214,6 +215,7 @@ void initiateParseTable();
  * Output: None
  */
 void initialiseMainStack();
+
 /*
  * Function: cleanMainStack
  * ------------------------
@@ -224,6 +226,7 @@ void initialiseMainStack();
  * Output: None
  */
 void cleanMainStack();
+
 /*
  * Function: push
  * --------------
@@ -237,6 +240,7 @@ void cleanMainStack();
  * - Returns 1 on success, 0 on failure.
  */
 int push(int unionVal, bool isT);
+
 /*
  * Function: pop
  * -------------
@@ -248,6 +252,7 @@ int push(int unionVal, bool isT);
  * - Returns 1 if successful, 0 if the stack is empty.
  */
 int pop();
+
 /*
  * Function: isEmpty
  * -----------------
@@ -273,6 +278,7 @@ bool isEmpty();
  * Output: None
  */
 void createParseTree(FILE *fp);
+
 /*
  * Function: printParseTree
  * -------------------------
@@ -284,6 +290,7 @@ void createParseTree(FILE *fp);
  * Output: None
  */
 void printParseTree(FILE *output);
+
 /*
  * Function: cleanTreeNode
  * ------------------------
@@ -365,6 +372,28 @@ bool containsEpsilon(terminalList * givenList);
  * Output: None
  */
 void removeEpsilon(terminalList *givenList);
+
+/*
+ * Function: cleanGrammar
+ * ------------------------
+ * Frees all the grammar rules and production rules contained in it.
+ *
+ * Input: None
+ *
+ * Output: None
+ */
+void cleanGrammar();
+
+/*
+ * Function: cleanParseTable
+ * ------------------------
+ * Frees the parse table.
+ *
+ * Input: None
+ *
+ * Output: None
+ */
+void cleanParseTable();
 
 /* ----------------- Debugging Functions ----------------- */
 

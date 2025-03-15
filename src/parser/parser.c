@@ -1236,3 +1236,28 @@ void printParseTable() {
     printf("\n");
   }
 }
+
+void cleanGrammar() {
+  for (int i = 0; i < nonTerminalCount; ++i) {
+    if (G->rules[i]) {
+      ProductionRule *rule = G->rules[i]->rules, *temp;
+      while (rule) {
+        temp = rule->nextRule;
+        RHSNode *node = rule->head, *next;
+        while (node) {
+          next = node->next;
+          free(node);
+          node = next;
+        }
+        free(rule);
+        rule = temp;
+      }
+      free(G->rules[i]);
+    }
+  }
+}
+
+void cleanParseTable() {
+  // Make sure to clean grammar as well.
+  free(PT);
+}

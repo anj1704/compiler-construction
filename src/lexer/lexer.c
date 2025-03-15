@@ -122,6 +122,12 @@ void initializeKeywords() {
   }
 }
 
+void cleanKeywords() {
+  for (int i = 0; i < keywordCount; i++)
+    if (keywords[i])
+      free(keywords[i]);
+}
+
 void initializeSymbolTable() {
   if (table)
     cleanTable();

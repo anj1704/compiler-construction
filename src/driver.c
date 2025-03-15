@@ -174,5 +174,13 @@ int main(int argc, char *argv[]) {
 
   fclose(fp);
   fclose(output);
+
+  cleanTable();
+  cleanKeywords();
+
+  cleanTreeNode(parseTreeRoot);
+  cleanMainStack();
+  cleanGrammar();
+  cleanParseTable();
   return 0;
 }
