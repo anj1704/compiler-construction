@@ -21,4 +21,5 @@ void appendTokenNode(TokenInfo **head, terminals token, char *lexeme,
                      int lineNo);
 void printTokens(TokenInfo *head);
 void freeTokenList(TokenInfo *head);
+void cleanTable();
 #endif

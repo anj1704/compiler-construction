@@ -94,6 +94,60 @@ followDS *createFollowDS() {
   return fol;
 }
 
+void initialiseMainStack() {
+  if (mainStack) {
+    cleanMainStack();
+  }
+
+  mainStack = (Stack*)malloc(sizeof(Stack));
+  mainStack->size = 0;
+  mainStack->head = NULL;
+}
+
+void cleanMainStack() {
+  StackNode *curr = mainStack->head;
+  while (curr) {
+    StackNode *temp = curr->next;
+    free(curr);
+    curr = temp;
+  }
+  free(mainStack);
+  mainStack = NULL;
+}
+
+void initialiseParseTreeRoot() {
+  if (parseTreeRoot != NULL) {
+    cleanTreeNode(parseTreeRoot);
+  }
+
+  parseTreeRoot = (TreeNode*)malloc(sizeof(TreeNode));
+}
+
+void cleanTreeNode(TreeNode *node) {
+  if (node == NULL)
+    return;
+  /*printf("%s started\n", (node->isT) ? terminalStrings[node->v.t] : nonTerminalStrings[node->v.nonT]);*/
+
+  if (node->firstChild != NULL)
+    cleanTreeNode(node->firstChild);
+
+  if (node->next != NULL)
+    cleanTreeNode(node->next);
+
+  if (node->stackNode != NULL)
+    free(node->stackNode);
+
+  if (node->SymTableItem != NULL)
+    free(node->SymTableItem);
+
+  /*printf("%s ended\n", (node->isT) ? terminalStrings[node->v.t] : nonTerminalStrings[node->v.nonT]);*/
+
+  if (node != NULL)
+    free(node);
+  /*printf("%s 3\n", (node->isT) ? terminalStrings[node->v.t] : nonTerminalStrings[node->v.nonT]);*/
+  node = NULL;
+}
+
 void addrule(nonTerminals nt, int size, gitems value[]) {
   LHSNode *lhsNode;
   if (G->rules[nt] == NULL) {
@@ -766,7 +820,7 @@ void joinTerminallistExcEps(terminalList *l1, terminalList *l2) {
     bool found = false;
 
     while (search != NULL) {
-      if ((search->t == cur->t)) {
+      if (search->t == cur->t) {
         found = true;
         break;
       }
@@ -1003,7 +1057,7 @@ void createParseTree(FILE* fp){
 
   while(!isEmpty() && currToken.eof == false){
     StackNode* currNode = top();
-    /*printf("Token is: %s\n", terminalStrings[currToken.token]);*/
+    printf("Token is: %s\n", terminalStrings[currToken.token]);
     if(currToken.token == TK_COMMENT){
       // CURRENT TOKEN IS A COMMENT
       currToken = getToken(fp);

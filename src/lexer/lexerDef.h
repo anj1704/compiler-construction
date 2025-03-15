@@ -7,7 +7,7 @@
 #include <sys/types.h>
 #include <time.h>
 
-#define tableSize 100000000
+#define tableSize 1000
 #define keywordCount 28
 #define terminalCount 60 
 #define nonTerminalCount 53

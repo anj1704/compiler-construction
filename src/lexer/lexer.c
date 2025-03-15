@@ -125,6 +125,8 @@ void initializeKeywords() {
 
 // Function to initialize SymbolTable
 void initializeSymbolTable() {
+  if (table)
+    cleanTable();
   table = (SymTable *)malloc(sizeof(SymTable));
   if (table == NULL) {
     fprintf(stderr, "Memory allocation failed for SymbolTable.\n");
@@ -134,7 +136,6 @@ void initializeSymbolTable() {
     table->items[i] = NULL;
   }
   table->sizeOfTable = 0;
-  initializeKeywords();
   // Insert keywords into the symbol table
   for (int i = 0; i < keywordCount; i++) {
     insert(keywords[i]->key, keywords[i]->token);
@@ -1035,6 +1036,18 @@ void freeTokenList(TokenInfo *head) {
     free(temp->lexeme);
     free(temp);
   }
+}
+
+void cleanTable() {
+  for (int i = 0; i < table->sizeOfTable; ++i) {
+    while (table->items[i]) {
+      SymTableItem *temp = table->items[i];
+      table->items[i] = table->items[i]->nextItem;
+      free(temp);
+    }
+  }
+  free(table);
+  table = NULL;
 }
 
 /*int main(void) {*/
