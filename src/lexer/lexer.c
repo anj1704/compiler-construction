@@ -3,7 +3,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-// SHOULD WE RETRACT WHILE THROWING ERROR
 
 extern char * terminalStrings[];
 extern char * nonTerminalsStrings[];
@@ -54,14 +53,17 @@ void removeComments(char *testCaseFile) {
   fclose(testCaseFp);
 }
 
-// initialising lexer
 FILE *initialise(char *inputFile, long long int buffSize) {
+  // Initialize the buffers
   memset(tBuff.bufferOne, 0, sizeof(tBuff.bufferOne));
   memset(tBuff.bufferTwo, 0, sizeof(tBuff.bufferTwo));
+
   FILE *fileptr = fopen(inputFile, "r");
   if (fileptr == NULL) {
     printf("ERROR! File not opened.\n");
   }
+
+  // Load the first buffer
   int size = fread(tBuff.bufferOne, sizeof(char), BUFFER_SIZE, fileptr);
   if (size < BUFFER_SIZE) {
     tBuff.bufferOne[size] = EOF;
@@ -69,10 +71,11 @@ FILE *initialise(char *inputFile, long long int buffSize) {
 
   loadBufferOne = false;
   loadBufferTwo = true;
-  // lineCount = 0;
   isEOF = false;
   startPtr = tBuff.bufferOne;
   endPtr = tBuff.bufferOne;
+
+  // Initialize the symbol table
   initializeSymbolTable();
 
   return fileptr;
@@ -123,7 +126,6 @@ void initializeKeywords() {
   }
 }
 
-// Function to initialize SymbolTable
 void initializeSymbolTable() {
   if (table)
     cleanTable();
@@ -132,11 +134,14 @@ void initializeSymbolTable() {
     fprintf(stderr, "Memory allocation failed for SymbolTable.\n");
     exit(EXIT_FAILURE);
   }
+
   for (int i = 0; i < tableSize; i++) {
     table->items[i] = NULL;
   }
   table->sizeOfTable = 0;
+
   initializeKeywords();
+
   // Insert keywords into the symbol table
   for (int i = 0; i < keywordCount; i++) {
     insert(keywords[i]->key, keywords[i]->token);
@@ -146,7 +151,7 @@ void initializeSymbolTable() {
 
 // Function to calculate hash
 int hash(char *lexeme) {
-  unsigned long hash = 5381;
+  unsigned long hash = 6492;
   int c;
   while ((c = *lexeme++)) {
     hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
@@ -154,7 +159,6 @@ int hash(char *lexeme) {
   return hash % tableSize;
 }
 
-// Function to insert into SymbolTable
 void insert(char *lexeme, terminals token) {
   int index = hash(lexeme);
 
@@ -172,7 +176,7 @@ void insert(char *lexeme, terminals token) {
       exit(EXIT_FAILURE);
     }
     newItem->token = token;
-    newItem->nextItem = NULL; // Initialize next pointer
+    newItem->nextItem = NULL; 
 
     // Insert newItem into the symbol table
     if (table->items[index] == NULL) {
@@ -195,11 +199,9 @@ void insert(char *lexeme, terminals token) {
   }
 }
 
-// Function to lookup a lexeme in SymbolTable
 SymTableItem *lookup(char *lexeme) {
   int index = hash(lexeme);
 
-  // Traverse the linked list at index to find the lexeme
   SymTableItem *current = table->items[index];
   while (current != NULL) {
     if (strcmp(current->lexeme, lexeme) == 0) {
@@ -212,7 +214,7 @@ SymTableItem *lookup(char *lexeme) {
   return NULL;
 }
 
-// error handling
+// Error handling
 SymTableItem errorHelper(int error, char *lex, int line) {
   SymTableItem nextSymbolItem;
   nextSymbolItem.token = TK_ERROR;
@@ -237,26 +239,28 @@ char *getLexeme() {
   int lengthLexeme;
   char *lexeme;
 
+  // Length of lexeme if in buffer one only
   if ((startPtr >= tBuff.bufferOne &&
        startPtr < tBuff.bufferOne + BUFFER_SIZE) &&
       (endPtr >= tBuff.bufferOne && endPtr <= tBuff.bufferOne + BUFFER_SIZE)) {
 
     lengthLexeme = endPtr - startPtr;
   }
-
+  // Length of lexeme if in buffer two only
   else if ((startPtr >= tBuff.bufferTwo &&
             startPtr < tBuff.bufferTwo + BUFFER_SIZE) &&
            (endPtr >= tBuff.bufferTwo &&
             endPtr <= tBuff.bufferTwo + BUFFER_SIZE)) {
 
     lengthLexeme = endPtr - startPtr;
-  } else {
+  } 
+  // Length of lexeme if in both buffers
+  else {
     lengthLexeme =
         tBuff.bufferOne + BUFFER_SIZE - startPtr + endPtr - tBuff.bufferTwo;
   }
 
   lexeme = (char *)malloc((lengthLexeme + 1) * sizeof(char));
-
   if (!lexeme) {
     fprintf(stderr, "Mem allocation failed");
     exit(EXIT_FAILURE);
@@ -283,6 +287,7 @@ char *getLexeme() {
             lengthLexeme - firstPartLength);
   }
 
+  // Null terminate the lexeme
   lexeme[lengthLexeme] = '\0';
 
   return lexeme;
@@ -316,7 +321,6 @@ FILE *getstream(FILE *fp) {
   return fp;
 }
 
-// DFA Handle....
 char getNextCharacter(FILE *fp) {
   char ch = *endPtr;
   if (ch == EOF) {
@@ -327,7 +331,6 @@ char getNextCharacter(FILE *fp) {
   return ch;
 }
 
-// FINDING KEYWORDS
 terminals findKeyword(char *lexeme) {
   for (int i = 0; i < keywordCount; i++) {
     if (strcmp(lexeme, keywords[i]->key) == 0) {
@@ -337,20 +340,11 @@ terminals findKeyword(char *lexeme) {
   return -1;
 }
 
-// tokenize
 SymTableItem tokenize(char *lex, terminals g, int line) {
-  /*SymTableItem nextSymbolItem;*/
-  /*nextSymbolItem.eof = false;*/
-  /*nextSymbolItem.lexeme = lex;*/
-  /*nextSymbolItem.lineCount = line;*/
-  /*nextSymbolItem.token = g;*/
-  /*nextSymbolItem.intVal = 0;*/
-  /*nextSymbolItem.realVal = 0.0;*/
   insert(lex, g);
   SymTableItem* nextSymbolItem = lookup(lex);
   switch (g) {
   case TK_NUM:
-    /*printf("%s\n", nextSymbolItem->lexeme);*/
     nextSymbolItem->intVal = atoi(lex);
     break;
   case TK_RNUM:
@@ -375,6 +369,7 @@ SymTableItem tokenize(char *lex, terminals g, int line) {
   startPtr = endPtr;
   return *nextSymbolItem;
 }
+
 SymTableItem getToken(FILE *fp) {
   startPtr = endPtr;
   char ch = getNextCharacter(fp);
@@ -394,29 +389,19 @@ SymTableItem getToken(FILE *fp) {
       return newSymbolItem;
     }
 
+    // Implementing DFA
     switch (dfastate) {
     case 1:
       switch (ch) {
-      // delim
       case '\t':
-        // startPtr = endPtr;
-        // ch = getNextCharacter(fp);
         dfastate = 41;
         break;
-      // delim
       case ' ':
-        // startPtr = endPtr;
-        // ch = getNextCharacter(fp);
         dfastate = 41;
         break;
-      // newline
       case '\n':
-        // startPtr = endPtr;
-        // lineCount++;
-        // ch = getNextCharacter(fp);
         dfastate = 43;
         break;
-      // operators
       case '+':
         dfastate = 15;
         break;
@@ -460,7 +445,6 @@ SymTableItem getToken(FILE *fp) {
         dfastate = 19;
         break;
       case '%':
-        // startPtr = endPtr;
         dfastate = 63;
         break;
       case '_':
@@ -531,7 +515,7 @@ SymTableItem getToken(FILE *fp) {
         dfastate = 5;
       } else {
         dfastate = -5;
-        endPtr--; // CHECK
+        endPtr--;
       }
       break;
 
@@ -565,7 +549,6 @@ SymTableItem getToken(FILE *fp) {
       }
       break;
 
-    // CHECK THIS
     case 10:
       endPtr--;
       SymTableItem *t = lookup(getLexeme());
@@ -606,7 +589,6 @@ SymTableItem getToken(FILE *fp) {
       }
       break;
 
-    // CHECK THIS
     case 14:
       endPtr--;
       lexeme = getLexeme();
@@ -675,8 +657,8 @@ SymTableItem getToken(FILE *fp) {
       if (ch == '=') {
         dfastate = 29;
       } else {
-        dfastate = -5; // CHECK ERROR CODE
-        endPtr--;     // CHECK
+        dfastate = -5;
+        endPtr--;     
       }
       break;
 
@@ -689,8 +671,8 @@ SymTableItem getToken(FILE *fp) {
       if (ch == '=') {
         dfastate = 31;
       } else {
-        dfastate = -5; // CHECK ERROR CODE
-        endPtr--;     // CHECK
+        dfastate = -5; 
+        endPtr--;     
       }
       break;
 
@@ -721,7 +703,7 @@ SymTableItem getToken(FILE *fp) {
       if (ch == '&') {
         dfastate = 36;
       } else {
-        dfastate = -5; // CHECK ERROR CODE
+        dfastate = -5; 
         endPtr--;
       }
       break;
@@ -731,7 +713,7 @@ SymTableItem getToken(FILE *fp) {
       if (ch == '&') {
         dfastate = 37;
       } else {
-        dfastate = -5; // CHECK ERROR CODE
+        dfastate = -5; 
         endPtr--;
       }
       break;
@@ -745,7 +727,7 @@ SymTableItem getToken(FILE *fp) {
       if (ch == '@') {
         dfastate = 39;
       } else {
-        dfastate = -5; // CHECK ERROR CODE
+        dfastate = -5; 
         endPtr--;
       }
       break;
@@ -755,7 +737,7 @@ SymTableItem getToken(FILE *fp) {
       if (ch == '@') {
         dfastate = 40;
       } else {
-        dfastate = -5; // CHECK ERROR CODE
+        dfastate = -5; 
         endPtr--;
       }
       break;
@@ -773,7 +755,7 @@ SymTableItem getToken(FILE *fp) {
         dfastate = 42;
       }
       break;
-    // CONTINUE DIRECTLY TAKES IT TO STATE 1 WITHOUT RETURNING ANYTHING?
+
     case 42:
       endPtr--;
       ch = getNextCharacter(fp);
@@ -786,7 +768,7 @@ SymTableItem getToken(FILE *fp) {
       lineCount++;
       dfastate = 1;
       break;
-    // WDYM ?
+
     case 44:
       exit(0);
 
@@ -796,7 +778,7 @@ SymTableItem getToken(FILE *fp) {
         dfastate = 46;
       } else {
         dfastate = -5;
-        endPtr--; // CHECK
+        endPtr--; 
       }
       break;
 
@@ -819,7 +801,7 @@ SymTableItem getToken(FILE *fp) {
         dfastate = 48;
       }
       break;
-    // CHECK THIS
+
     case 48:
       endPtr--;
       lexeme = getLexeme();
@@ -847,7 +829,7 @@ SymTableItem getToken(FILE *fp) {
         dfastate = 50;
       } else {
         dfastate = -5;
-        endPtr--; // CHECK
+        endPtr--; 
       }
       break;
 
@@ -859,7 +841,7 @@ SymTableItem getToken(FILE *fp) {
         dfastate = 51;
       }
       break;
-    // TOKENINFO OR SYMBOL TABLE?
+
     case 51:
       endPtr--;
       lexeme = getLexeme();
@@ -897,7 +879,6 @@ SymTableItem getToken(FILE *fp) {
         dfastate = 55;
       } else {
         dfastate = -5;
-        // Also retracting
         endPtr--;
       }
       break;
@@ -919,7 +900,7 @@ SymTableItem getToken(FILE *fp) {
         dfastate = 60;
       } else {
         dfastate = -5;
-        endPtr--; // CHECK
+        endPtr--; 
       }
       break;
 
@@ -929,11 +910,9 @@ SymTableItem getToken(FILE *fp) {
         dfastate = 60;
       } else {
         dfastate = -5;
-        endPtr--; // CHECK
+        endPtr--; 
       }
       break;
-    // we haven't used a getval function as mentioned, so change implementation
-    // of tokenize if needed
     case 58:
       endPtr -= 2;
       return tokenize(getLexeme(), TK_NUM, lineCount);
@@ -948,12 +927,10 @@ SymTableItem getToken(FILE *fp) {
         dfastate = 62;
       } else {
         dfastate = -5;
-        endPtr--; // CHECK
+        endPtr--; 
       }
       break;
 
-    // we haven't used a getval function as mentioned, so change implementation
-    // of tokenize if needed
     case 61:
       endPtr--;
       return tokenize(getLexeme(), TK_NUM, lineCount);
@@ -961,7 +938,6 @@ SymTableItem getToken(FILE *fp) {
     case 62:
       return tokenize(getLexeme(), TK_RNUM, lineCount);
 
-    // DO 63,64
     case 63:
       ch = getNextCharacter(fp);
       if (ch != '\n') {
@@ -979,6 +955,7 @@ SymTableItem getToken(FILE *fp) {
     }
   }
 
+  // Identify lexer error, return TK_ERROR
   if (dfastate < 0) {
     lexeme = getLexeme();
     return errorHelper(dfastate, lexeme, lineCount);
@@ -1003,36 +980,3 @@ void cleanTable() {
   free(table);
   table = NULL;
 }
-
-/*int main(void) {*/
-/*  char *sourceFile = "./Lexer Test Cases/t1.txt";*/
-/*  char *cleanFile = "./Lexer Test Cases/cleaned.txt";*/
-/**/
-/*  removeComments(sourceFile, cleanFile);*/
-/**/
-/*  FILE *fp = initialise(sourceFile, BUFFER_SIZE);*/
-/*  if (!fp) {*/
-/*    fprintf(stderr, "Failed to initialize lexer with file: %s\n", cleanFile);*/
-/*    return 1;*/
-/*  }*/
-/**/
-/*  SymTableItem currToken;*/
-/*  int tokenCount = 0;*/
-/*  lineCount = 1;*/
-/**/
-/*  while (!isEOF) {*/
-/*    currToken = getToken(fp);*/
-/**/
-/*    if (currToken.lexeme != NULL) {*/
-/*      printf("LineNo: %d , Token: %s, Lexeme: %s\n", currToken.lineCount,*/
-/*             terminalStrings[currToken.token], currToken.lexeme);*/
-/*      tokenCount++;*/
-/*    }*/
-/*  }*/
-/**/
-/*  printf("Total number of tokens: %d\n", tokenCount);*/
-/**/
-/*  fclose(fp);*/
-/**/
-/*  return 0;*/
-/*}*/
