@@ -170,8 +170,6 @@ typedef enum {
     TK_ERROR
 } terminals;
 
-
-
 //Item of a symbol table
 typedef struct symTableItem {
   terminals token;
@@ -200,14 +198,5 @@ typedef struct keyword{
 char* key;
 terminals token;
 } keyword;
-
-
-typedef struct tokenInfo 
-{
-terminals token; 
-char* lexeme;
-int lineNo;
-struct tokenInfo* next;
-} TokenInfo;
 
 #endif

@@ -101,10 +101,7 @@ int main(int argc, char *argv[]) {
   end = clock();
 
   while (1) {
-    for (int i = 0; i < 200; i++) {
-      printf("=");
-    }
-    printf("\n");
+    printf("====================================================================================\n");
     printf("Choose an option:\n");
     printf("0. Exit\n");
     printf("1. Print comment free code on console\n");
@@ -112,10 +109,7 @@ int main(int argc, char *argv[]) {
     printf("3. Perform parsing and print parse tree to file.\n");
     printf("4. Print the time taken to perform parsing\n");
     scanf("%d", &option);
-    for (int i = 0; i < 200; i++) {
-      printf("=");
-    }
-    printf("\n");
+    printf("====================================================================================\n");
 
     if (option == 0)
       break;
@@ -168,6 +162,10 @@ int main(int argc, char *argv[]) {
       double totalCPUTimeInSeconds = totalCPUTime / CLOCKS_PER_SEC;
       printf("Total CPU time taken: %f\n", totalCPUTime);
       printf("Total CPU time in seconds: %f\n", totalCPUTimeInSeconds);
+      break;
+    }
+    default: {
+      printf("Please enter a value in [0, 4]\n");
       break;
     }
     }

@@ -136,6 +136,7 @@ void initializeSymbolTable() {
     table->items[i] = NULL;
   }
   table->sizeOfTable = 0;
+  initializeKeywords();
   // Insert keywords into the symbol table
   for (int i = 0; i < keywordCount; i++) {
     insert(keywords[i]->key, keywords[i]->token);
@@ -989,53 +990,6 @@ SymTableItem getToken(FILE *fp) {
   newSymbolItem.intVal = 0;
   newSymbolItem.realVal = 0.0;
   return newSymbolItem;
-}
-
-TokenInfo *createTokenNode(terminals token, char *lexeme, int lineNo) {
-  TokenInfo *node = (TokenInfo *)malloc(sizeof(TokenInfo));
-  if (!node) {
-    printf("Memory allocation error\n");
-    exit(EXIT_FAILURE);
-  }
-
-  node->token = token;
-  node->lexeme = strdup(lexeme);
-  node->lineNo = lineNo;
-  node->next = NULL;
-  return node;
-}
-
-void appendTokenNode(TokenInfo **head, terminals token, char *lexeme,
-                     int lineNo) {
-  TokenInfo *newNode = createTokenNode(token, lexeme, lineNo);
-  if (*head == NULL) {
-    *head = newNode;
-  } else {
-    TokenInfo *temp = *head;
-    while (temp->next != NULL) {
-      temp = temp->next;
-    }
-    temp->next = newNode;
-  }
-}
-
-void printTokens(TokenInfo *head) {
-  TokenInfo *current = head;
-  while (current != NULL) {
-    printf("LineNo: %d , Token: %s , Lexeme: %s\n", current->lineNo,
-           terminalStrings[current->token], current->lexeme);
-    current = current->next;
-  }
-}
-
-void freeTokenList(TokenInfo *head) {
-  TokenInfo *temp;
-  while (head != NULL) {
-    temp = head;
-    head = head->next;
-    free(temp->lexeme);
-    free(temp);
-  }
 }
 
 void cleanTable() {
